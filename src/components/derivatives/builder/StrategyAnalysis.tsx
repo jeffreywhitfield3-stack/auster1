@@ -82,7 +82,7 @@ export default function StrategyAnalysis({ strategy }: StrategyAnalysisProps) {
                 The stock prices where you neither profit nor lose at expiration.
               </p>
             </Tip>
-            : {breakevens.map(be => `$${be.toFixed(2)}`).join(", ")}
+            : {breakevens.map(be => `$${(be ?? 0).toFixed(2)}`).join(", ")}
           </div>
         )}
       </div>
@@ -112,8 +112,8 @@ export default function StrategyAnalysis({ strategy }: StrategyAnalysisProps) {
         <ul className="mt-2 space-y-1 text-blue-800">
           {creditDebit > 0 && <li>✓ Credit strategy: you collect premium upfront</li>}
           {creditDebit < 0 && <li>• Debit strategy: you pay premium upfront</li>}
-          {probabilityOfProfit > 60 && <li>✓ High probability of profit ({probabilityOfProfit.toFixed(0)}%)</li>}
-          {probabilityOfProfit < 40 && <li>⚠️ Lower probability of profit ({probabilityOfProfit.toFixed(0)}%)</li>}
+          {probabilityOfProfit > 60 && <li>✓ High probability of profit ({(probabilityOfProfit ?? 0).toFixed(0)}%)</li>}
+          {probabilityOfProfit < 40 && <li>⚠️ Lower probability of profit ({(probabilityOfProfit ?? 0).toFixed(0)}%)</li>}
           {thetaPerDay > 0 && <li>✓ Positive theta: time decay works in your favor</li>}
           {thetaPerDay < 0 && <li>• Negative theta: time decay works against you</li>}
           {Math.abs(maxLoss) > Math.abs(maxProfit) * 2 && (

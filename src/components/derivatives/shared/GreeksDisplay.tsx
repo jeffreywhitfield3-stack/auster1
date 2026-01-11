@@ -25,7 +25,7 @@ export default function GreeksDisplay({
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
 
   const formatGreek = (value: number | null | undefined, decimals: number = 3): string => {
-    if (value === null || value === undefined) return "--";
+    if (value === null || value === undefined || !Number.isFinite(value)) return "--";
     return value.toFixed(decimals);
   };
 

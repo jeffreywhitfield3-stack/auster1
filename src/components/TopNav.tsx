@@ -104,7 +104,6 @@ export default function TopNav() {
               <div className="absolute left-0 mt-2 w-80 rounded-xl border border-zinc-200 bg-white p-2 shadow-xl">
                 {products.map((product) => (
                   <div key={product.href}>
-                    {product.divider && <div className="my-2 h-px bg-zinc-200" />}
                     <Link
                       href={product.href}
                       onClick={() => setProductsOpen(false)}

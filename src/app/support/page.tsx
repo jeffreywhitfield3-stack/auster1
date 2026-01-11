@@ -1,123 +1,246 @@
-// src/app/support/page.tsx
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
 export default function SupportPage() {
   return (
-    <main className="mx-auto max-w-3xl p-6">
-      <div className="mb-6">
-        <div className="text-xs font-semibold text-zinc-500">Support</div>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-900">Need help?</h1>
-        <p className="mt-2 text-sm text-zinc-600">
-          If something isn’t working, have a question, or want to request access, reach out anytime.
-        </p>
-      </div>
-
-      <div className="grid gap-6">
-        {/* Contact */}
-        <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
-          <div className="text-sm font-semibold text-zinc-900">Contact support</div>
-          <p className="mt-2 text-sm text-zinc-600">
-            Email us at{" "}
-            <a
-              className="font-semibold text-zinc-900 underline underline-offset-2 hover:text-zinc-700"
-              href="mailto:support@austerian.com?subject=Austerian%20Support"
-            >
-              support@austerian.com
-            </a>{" "}
-            and include:
-          </p>
-          <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-zinc-600">
-            <li>What page/tool you were using</li>
-            <li>What you expected to happen vs. what happened</li>
-            <li>Any error message (copy/paste is perfect)</li>
-          </ul>
-
-          <div className="mt-4 flex flex-wrap gap-2">
-            <a
-              href="mailto:support@austerian.com?subject=Austerian%20Support"
-              className="inline-flex items-center justify-center rounded-xl bg-zinc-900 px-3 py-2 text-sm font-semibold text-white hover:bg-zinc-800"
-            >
-              Email support
-            </a>
-            <Link
-              href="/products"
-              className="inline-flex items-center justify-center rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm font-semibold text-zinc-900 hover:bg-zinc-50"
-            >
-              Browse products
-            </Link>
-          </div>
-        </section>
-
-        {/* Billing / cancel */}
-        <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
-          <div className="text-sm font-semibold text-zinc-900">Billing & subscriptions</div>
-          <p className="mt-2 text-sm text-zinc-600">
-            To manage your plan or cancel your subscription, use the billing portal.
-          </p>
-
-          {/* Adjust this href to wherever your Stripe Customer Portal lives. */}
-          <div className="mt-4">
-            <Link
-              href="/billing"
-              className="inline-flex items-center justify-center rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm font-semibold text-zinc-900 hover:bg-zinc-50"
-            >
-              Manage / cancel subscription
-            </Link>
-          </div>
-
-          <p className="mt-2 text-xs text-zinc-500">
-            If you haven’t wired Stripe yet, keep this link pointing to <code className="rounded bg-zinc-50 px-1">/billing</code>{" "}
-            for now and we’ll connect it to Stripe Customer Portal when you’re ready.
-          </p>
-        </section>
-
-        {/* Access / scholarships */}
-        <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
-          <div className="text-sm font-semibold text-zinc-900">Free access for students & under-resourced users</div>
-          <p className="mt-2 text-sm text-zinc-600">
-            Money shouldn’t be the reason you can’t learn or build. If you’re a student or money is a barrier right now,
-            you can request free usage.
-          </p>
-
-          <div className="mt-3 rounded-xl border border-zinc-200 bg-zinc-50 p-4">
-            <div className="text-sm font-semibold text-zinc-900">Request free access</div>
-            <p className="mt-1 text-sm text-zinc-600">
-              Email{" "}
-              <a
-                className="font-semibold text-zinc-900 underline underline-offset-2 hover:text-zinc-700"
-                href="mailto:info@austerian.com?subject=Free%20Access%20Request%20(Austerian)"
-              >
-                info@austerian.com
-              </a>{" "}
-              with:
+    <main className="min-h-screen bg-white">
+      {/* Hero Section */}
+      <section className="border-b border-zinc-200 bg-gradient-to-b from-zinc-50 to-white">
+        <div className="mx-auto max-w-4xl px-6 py-24 sm:py-32">
+          <div className="text-center">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 shadow-sm">
+              💬 Support
+            </div>
+            <h1 className="mt-6 text-4xl font-bold tracking-tight text-zinc-900 sm:text-5xl lg:text-6xl">
+              We're here to help
+            </h1>
+            <p className="mt-6 text-xl leading-8 text-zinc-600">
+              If something isn't working, have a question, or want to request access, reach out anytime.
+              We respond to every message.
             </p>
-            <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-zinc-600">
-              <li>What you plan on using Austerian for</li>
-              <li>Which product(s) you want access to</li>
-              <li>Any context you’re comfortable sharing (optional)</li>
-            </ul>
-            <p className="mt-3 text-sm text-zinc-600">
-              I personally review these and I’ll get back to you as quickly as I can.
+          </div>
+        </div>
+      </section>
+
+      {/* Support Options */}
+      <section className="border-b border-zinc-200 bg-white py-24">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="grid gap-8 lg:grid-cols-2">
+            {/* Technical Support */}
+            <div className="rounded-2xl border border-zinc-200 bg-white p-8 shadow-lg transition-all hover:shadow-xl">
+              <div className="inline-flex items-center gap-3 rounded-lg bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-900">
+                🛠️ Technical Support
+              </div>
+
+              <h2 className="mt-6 text-2xl font-bold text-zinc-900">
+                Something not working?
+              </h2>
+
+              <p className="mt-4 text-base leading-7 text-zinc-600">
+                Report bugs, issues, or unexpected behavior. We'll investigate and get back to you quickly.
+              </p>
+
+              <div className="mt-6 rounded-lg border border-zinc-200 bg-zinc-50 p-4">
+                <p className="text-sm font-semibold text-zinc-900">What to include:</p>
+                <ul className="mt-3 space-y-2 text-sm text-zinc-700">
+                  <li className="flex items-start gap-2">
+                    <span className="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-zinc-400"></span>
+                    <span>Which page or tool you were using</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-zinc-400"></span>
+                    <span>What you expected vs. what actually happened</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-zinc-400"></span>
+                    <span>Any error messages (screenshots help!)</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-zinc-400"></span>
+                    <span>Your browser (Chrome, Safari, Firefox, etc.)</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="mt-8">
+                <a
+                  href="mailto:support@austerian.com?subject=Austerian%20Support"
+                  className="inline-flex items-center justify-center rounded-lg bg-zinc-900 px-6 py-3 text-base font-semibold text-white shadow-lg transition-all hover:bg-zinc-800 hover:shadow-xl"
+                >
+                  Email support@austerian.com →
+                </a>
+              </div>
+            </div>
+
+            {/* Billing & Subscriptions */}
+            <div className="rounded-2xl border border-zinc-200 bg-white p-8 shadow-lg transition-all hover:shadow-xl">
+              <div className="inline-flex items-center gap-3 rounded-lg bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-900">
+                💳 Billing & Subscriptions
+              </div>
+
+              <h2 className="mt-6 text-2xl font-bold text-zinc-900">
+                Manage your subscription
+              </h2>
+
+              <p className="mt-4 text-base leading-7 text-zinc-600">
+                Update payment methods, change your plan, or cancel your subscription anytime.
+                No questions asked, no hidden fees.
+              </p>
+
+              <div className="mt-6 space-y-3">
+                <div className="flex items-start gap-3">
+                  <svg className="mt-1 h-5 w-5 flex-shrink-0 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-sm text-zinc-700">Instant cancellation, no retention tactics</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <svg className="mt-1 h-5 w-5 flex-shrink-0 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-sm text-zinc-700">Pro-rated refunds for unused time</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <svg className="mt-1 h-5 w-5 flex-shrink-0 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-sm text-zinc-700">Secure payment processing via Stripe</span>
+                </div>
+              </div>
+
+              <div className="mt-8">
+                <Link
+                  href="/billing"
+                  className="inline-flex items-center justify-center rounded-lg border-2 border-zinc-300 bg-white px-6 py-3 text-base font-semibold text-zinc-900 transition-all hover:border-zinc-400 hover:bg-zinc-50"
+                >
+                  Manage subscription →
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Free Access Section */}
+      <section className="bg-zinc-50 py-24">
+        <div className="mx-auto max-w-4xl px-6">
+          <div className="rounded-2xl border-2 border-zinc-300 bg-white p-8 shadow-xl sm:p-12">
+            <div className="inline-flex items-center gap-3 rounded-lg bg-violet-50 px-4 py-2 text-sm font-semibold text-violet-900">
+              🎓 Free Access Program
+            </div>
+
+            <h2 className="mt-6 text-3xl font-bold text-zinc-900">
+              Free access for students & under-resourced users
+            </h2>
+
+            <p className="mt-6 text-lg leading-8 text-zinc-600">
+              Money shouldn't be the reason you can't learn or build. If you're a student or money is a barrier right now,
+              you can request free usage. No complicated forms, no bureaucracy.
             </p>
 
-            <div className="mt-4">
+            <div className="mt-8 rounded-xl border border-zinc-200 bg-zinc-50 p-6">
+              <h3 className="text-base font-bold text-zinc-900">How to request free access</h3>
+
+              <p className="mt-4 text-sm leading-6 text-zinc-700">
+                Email{" "}
+                <a
+                  className="font-semibold text-zinc-900 underline underline-offset-2 hover:text-zinc-700"
+                  href="mailto:info@austerian.com?subject=Free%20Access%20Request%20(Austerian)"
+                >
+                  info@austerian.com
+                </a>{" "}
+                with the following:
+              </p>
+
+              <ul className="mt-4 space-y-2 text-sm text-zinc-700">
+                <li className="flex items-start gap-3">
+                  <span className="mt-1 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-violet-100 text-xs font-bold text-violet-700">
+                    1
+                  </span>
+                  <span>What you plan on using Auster for</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="mt-1 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-violet-100 text-xs font-bold text-violet-700">
+                    2
+                  </span>
+                  <span>Which product(s) you want access to</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="mt-1 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-violet-100 text-xs font-bold text-violet-700">
+                    3
+                  </span>
+                  <span>Any context you're comfortable sharing (completely optional)</span>
+                </li>
+              </ul>
+
+              <div className="mt-6 rounded-lg border border-violet-200 bg-violet-50 p-4">
+                <p className="text-sm font-semibold text-violet-900">
+                  💡 We personally review every request
+                </p>
+                <p className="mt-2 text-sm text-violet-800">
+                  I read and respond to these myself. If you're genuinely trying to learn or build something meaningful,
+                  you'll get access. Promise.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-8">
               <a
                 href="mailto:info@austerian.com?subject=Free%20Access%20Request%20(Austerian)&body=Hi%20Austerian%20team%2C%0A%0AI%E2%80%99m%20requesting%20free%20access.%0A%0AWhat%20I%20plan%20to%20use%20Austerian%20for%3A%0A-%20%0A%0AProducts%20I%E2%80%99d%20like%20access%20to%3A%0A-%20%0A%0AThank%20you!"
-                className="inline-flex items-center justify-center rounded-xl bg-zinc-900 px-3 py-2 text-sm font-semibold text-white hover:bg-zinc-800"
+                className="inline-flex items-center justify-center rounded-lg bg-violet-600 px-6 py-3 text-base font-semibold text-white shadow-lg transition-all hover:bg-violet-700 hover:shadow-xl"
               >
-                Email free access request
+                Request free access →
               </a>
             </div>
           </div>
-        </section>
-
-        {/* Footer note */}
-        <div className="text-xs text-zinc-500">
-          Tip: If you’re reporting a bug, including a screenshot and your browser (Chrome/Safari/Firefox) helps a lot.
         </div>
-      </div>
+      </section>
+
+      {/* Quick Links */}
+      <section className="border-t border-zinc-200 bg-white py-16">
+        <div className="mx-auto max-w-7xl px-6">
+          <h2 className="text-center text-base font-semibold uppercase tracking-wide text-zinc-500">
+            Quick Links
+          </h2>
+          <div className="mt-8 grid gap-4 sm:grid-cols-3">
+            <Link
+              href="/products/derivatives"
+              className="rounded-lg border border-zinc-200 bg-white p-4 text-center transition-all hover:border-zinc-300 hover:shadow-md"
+            >
+              <div className="text-sm font-semibold text-zinc-900">Derivatives Lab</div>
+              <div className="mt-1 text-xs text-zinc-600">Options analysis & strategy builder</div>
+            </Link>
+            <Link
+              href="/products/econ"
+              className="rounded-lg border border-zinc-200 bg-white p-4 text-center transition-all hover:border-zinc-300 hover:shadow-md"
+            >
+              <div className="text-sm font-semibold text-zinc-900">Econ Lab</div>
+              <div className="mt-1 text-xs text-zinc-600">Economic research & analysis</div>
+            </Link>
+            <Link
+              href="/pricing"
+              className="rounded-lg border border-zinc-200 bg-white p-4 text-center transition-all hover:border-zinc-300 hover:shadow-md"
+            >
+              <div className="text-sm font-semibold text-zinc-900">Pricing</div>
+              <div className="mt-1 text-xs text-zinc-600">View plans & pricing</div>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer Note */}
+      <section className="border-t border-zinc-200 bg-zinc-50 py-8">
+        <div className="mx-auto max-w-4xl px-6 text-center">
+          <p className="text-sm text-zinc-600">
+            <strong>Response time:</strong> We typically respond within 24 hours on weekdays.
+            Complex technical issues may take longer to investigate.
+          </p>
+          <p className="mt-2 text-xs text-zinc-500">
+            Tip: Screenshots and detailed descriptions help us resolve issues faster.
+          </p>
+        </div>
+      </section>
     </main>
   );
 }

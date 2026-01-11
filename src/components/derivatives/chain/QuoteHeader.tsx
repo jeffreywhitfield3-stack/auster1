@@ -68,8 +68,8 @@ export default function QuoteHeader({
   const ivRankInfo = getIVRankLevel(ivRank);
 
   // Determine earnings risk level
-  const hasEarningsRisk = daysToEarnings !== null && daysToEarnings < 14;
-  const isImminentEarnings = daysToEarnings !== null && daysToEarnings < 7;
+  const hasEarningsRisk = daysToEarnings != null && daysToEarnings < 14;
+  const isImminentEarnings = daysToEarnings != null && daysToEarnings < 7;
 
   return (
     <div className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm">

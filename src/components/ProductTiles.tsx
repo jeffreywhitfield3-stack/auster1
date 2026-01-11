@@ -15,9 +15,9 @@ const tiles: Tile[] = [
     href: "/products/derivatives",
   },
   {
-    title: "Econ & Econometrics",
-    tag: "Formulas + tables",
-    desc: "Exam-ready calculators: OLS, hypothesis tests, elasticities, macro indicators, regression helpers.",
+    title: "Econ Lab",
+    tag: "Research environment",
+    desc: "Econometrics, inequality analysis, macroeconomic research, and microeconomic modeling. A complete analytical lab.",
     href: "/products/econ",
   },
   {

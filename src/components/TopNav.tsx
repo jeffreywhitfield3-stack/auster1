@@ -49,6 +49,13 @@ export default function TopNav() {
 
   const products = [
     {
+      name: "Research Stage",
+      href: "/research",
+      description: "Public research institution & attribution",
+      icon: "🔬",
+      badge: "NEW",
+    },
+    {
       name: "Derivatives Lab",
       href: "/products/derivatives",
       description: "Options chain, strategy builder, screeners",
@@ -125,8 +132,13 @@ export default function TopNav() {
                       <div className="flex items-start gap-3">
                         <span className="text-xl">{product.icon}</span>
                         <div className="flex-1">
-                          <div className="text-sm font-semibold text-zinc-900 group-hover:text-zinc-900">
-                            {product.name}
+                          <div className="flex items-center gap-2 text-sm font-semibold text-zinc-900 group-hover:text-zinc-900">
+                            <span>{product.name}</span>
+                            {"badge" in product && product.badge && (
+                              <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-900">
+                                {product.badge}
+                              </span>
+                            )}
                           </div>
                           <div className="mt-0.5 text-xs text-zinc-600">
                             {product.description}

@@ -172,7 +172,7 @@ export default function ChainTable({
                 >
                   {/* Call side */}
                   <td className="px-3 py-2 text-right font-mono text-zinc-900">
-                    {strike.toFixed(2)}
+                    {(strike ?? 0).toFixed(2)}
                   </td>
                   <td
                     className={`cursor-pointer px-3 py-2 text-right font-mono transition-colors ${
@@ -243,7 +243,7 @@ export default function ChainTable({
                     {put?.bid?.toFixed(2) ?? "-"}
                   </td>
                   <td className="px-3 py-2 text-left font-mono text-zinc-900">
-                    {strike.toFixed(2)}
+                    {(strike ?? 0).toFixed(2)}
                   </td>
                 </tr>
               );
@@ -269,7 +269,7 @@ export default function ChainTable({
               }`}
             >
               <div className="mb-2 text-center text-lg font-bold text-zinc-900">
-                ${strike.toFixed(2)}
+                ${(strike ?? 0).toFixed(2)}
                 {isATM && (
                   <span className="ml-2 text-xs font-normal text-yellow-700">
                     (ATM)
@@ -344,7 +344,7 @@ export default function ChainTable({
       {/* Educational tip */}
       <div className="mt-4 rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-900">
         <span className="font-semibold">Tip:</span> Click any contract to add
-        it to your Strategy Builder. ATM strikes (near ${underlying.toFixed(2)})
+        it to your Strategy Builder. ATM strikes (near ${(underlying ?? 0).toFixed(2)})
         are highlighted in yellow.
       </div>
 

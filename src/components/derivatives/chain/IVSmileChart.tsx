@@ -283,7 +283,7 @@ export default function IVSmileChart({
             >
               <title>
                 {point.type.toUpperCase()} ${point.strike} - IV:{" "}
-                {point.iv.toFixed(2)}%
+                {(point.iv ?? 0).toFixed(2)}%
               </title>
             </circle>
           ))}
@@ -295,7 +295,7 @@ export default function IVSmileChart({
             textAnchor="middle"
             className="fill-yellow-600 text-xs font-semibold"
           >
-            ATM (${underlying.toFixed(2)})
+            ATM (${(underlying ?? 0).toFixed(2)})
           </text>
 
           {/* Axis labels */}

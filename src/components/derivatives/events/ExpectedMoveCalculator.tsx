@@ -49,7 +49,7 @@ export default function ExpectedMoveCalculator({
           </p>
           {atmStraddle && (
             <p className="mb-2 font-mono text-[11px]">
-              ${atmStraddle.toFixed(2)} × 0.85 = ${expectedMove.toFixed(2)}
+              ${(atmStraddle ?? 0).toFixed(2)} × 0.85 = ${(expectedMove ?? 0).toFixed(2)}
             </p>
           )}
           <p className="text-[11px] text-zinc-600">
@@ -62,13 +62,13 @@ export default function ExpectedMoveCalculator({
       <div className="space-y-3">
         <div className="flex items-center justify-between text-sm">
           <span className="font-mono text-zinc-600">
-            ${rangeLow.toFixed(2)}
+            ${(rangeLow ?? 0).toFixed(2)}
           </span>
           <span className="font-mono font-semibold text-zinc-900">
-            ${currentPrice.toFixed(2)}
+            ${(currentPrice ?? 0).toFixed(2)}
           </span>
           <span className="font-mono text-zinc-600">
-            ${rangeHigh.toFixed(2)}
+            ${(rangeHigh ?? 0).toFixed(2)}
           </span>
         </div>
 
@@ -96,19 +96,19 @@ export default function ExpectedMoveCalculator({
         <div className="flex items-center justify-between">
           <span className="text-sm text-zinc-700">Current Price:</span>
           <span className="font-mono text-sm font-semibold text-zinc-900">
-            ${currentPrice.toFixed(2)}
+            ${(currentPrice ?? 0).toFixed(2)}
           </span>
         </div>
         <div className="flex items-center justify-between">
           <span className="text-sm text-zinc-700">Expected Move:</span>
           <span className="font-mono text-sm font-semibold text-zinc-900">
-            ±${expectedMove.toFixed(2)} ({expectedMovePct.toFixed(1)}%)
+            ±${(expectedMove ?? 0).toFixed(2)} ({expectedMovePct.toFixed(1)}%)
           </span>
         </div>
         <div className="flex items-center justify-between">
           <span className="text-sm text-zinc-700">Expected Range:</span>
           <span className="font-mono text-sm font-semibold text-zinc-900">
-            ${rangeLow.toFixed(2)} - ${rangeHigh.toFixed(2)}
+            ${(rangeLow ?? 0).toFixed(2)} - ${(rangeHigh ?? 0).toFixed(2)}
           </span>
         </div>
       </div>
@@ -140,7 +140,7 @@ export default function ExpectedMoveCalculator({
             <span className="text-zinc-400">•</span>
             <span>
               <span className="font-semibold">Iron Condor:</span> Place wings
-              outside ${rangeLow.toFixed(2)} - ${rangeHigh.toFixed(2)} for
+              outside ${(rangeLow ?? 0).toFixed(2)} - ${(rangeHigh ?? 0).toFixed(2)} for
               higher probability of profit
             </span>
           </li>

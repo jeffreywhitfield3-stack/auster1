@@ -406,7 +406,7 @@ export default function StrategyTemplates({
           <div className="text-sm text-blue-900">
             <p className="font-semibold">Templates auto-fill with smart defaults</p>
             <p className="mt-1">
-              Based on {symbol} at ${currentPrice.toFixed(2)} expiring {expiration}.
+              Based on {symbol} at ${(currentPrice ?? 0).toFixed(2)} expiring {expiration}.
               Adjust strikes and quantities after applying.
             </p>
           </div>

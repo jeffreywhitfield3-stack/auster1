@@ -67,7 +67,7 @@ export default function LegsList({
   };
 
   const formatPrice = (price: number) => {
-    return `$${price.toFixed(2)}`;
+    return `$${(price ?? 0).toFixed(2)}`;
   };
 
   const getLegCost = (leg: OptionLeg) => {
@@ -241,10 +241,10 @@ export default function LegsList({
                       </span>
                     </span>
                     {leg.delta !== null && leg.delta !== undefined && (
-                      <span>Delta: {leg.delta.toFixed(2)}</span>
+                      <span>Delta: {(leg.delta ?? 0).toFixed(2)}</span>
                     )}
                     {leg.theta !== null && leg.theta !== undefined && (
-                      <span>Theta: ${(leg.theta * leg.quantity * 100).toFixed(2)}/day</span>
+                      <span>Theta: ${((leg.theta ?? 0) * leg.quantity * 100).toFixed(2)}/day</span>
                     )}
                   </div>
                 </div>

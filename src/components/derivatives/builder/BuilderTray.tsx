@@ -76,7 +76,7 @@ export default function BuilderTray({
           </div>
 
           <div className="mt-3 rounded-lg bg-zinc-50 p-3 text-xs text-zinc-700">
-            <span className="font-semibold">Underlying:</span> {strategy.underlying} @ ${strategy.underlyingPrice.toFixed(2)}
+            <span className="font-semibold">Underlying:</span> {strategy.underlying} @ ${(strategy.underlyingPrice ?? 0).toFixed(2)}
           </div>
         </div>
       ) : (

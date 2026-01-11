@@ -96,18 +96,29 @@ export default function InequalityClient() {
     <main className="mx-auto min-h-screen max-w-7xl p-6">
       {/* Header */}
       <div className="mb-8">
-        <Link
-          href="/products/econ"
-          className="inline-flex items-center gap-2 text-sm font-semibold text-violet-600 hover:text-violet-700"
-        >
-          ← Back to Econ Lab
-        </Link>
-        <h1 className="mt-4 text-4xl font-bold text-zinc-900 sm:text-5xl">
-          📊 Inequality &amp; Disparities Lab
-        </h1>
-        <p className="mt-4 text-lg leading-7 text-zinc-600">
-          Surfacing patterns that shape society. Analyze income distribution, wage gaps, and structural inequalities.
-        </p>
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1">
+            <Link
+              href="/products/econ"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-violet-600 hover:text-violet-700"
+            >
+              ← Back to Econ Lab
+            </Link>
+            <h1 className="mt-4 text-4xl font-bold text-zinc-900 sm:text-5xl">
+              📊 Inequality &amp; Disparities Lab
+            </h1>
+            <p className="mt-4 text-lg leading-7 text-zinc-600">
+              Surfacing patterns that shape society. Analyze income distribution, wage gaps, and structural inequalities.
+            </p>
+          </div>
+          <Link
+            href="/research/publish?from=econ-inequality"
+            className="flex items-center gap-2 rounded-lg border-2 border-blue-600 bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:border-blue-700 hover:bg-blue-700"
+          >
+            <span>📊</span>
+            <span>Publish to Research Stage</span>
+          </Link>
+        </div>
       </div>
 
       {/* Loading State */}

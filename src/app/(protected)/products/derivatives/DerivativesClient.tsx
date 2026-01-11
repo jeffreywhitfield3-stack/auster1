@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import PaywallBanner from "@/components/econ/PaywallBanner";
 import { peekUsage, incrementUsage } from "@/lib/usage-client";
 
@@ -175,6 +176,14 @@ export default function DerivativesClient() {
           >
             {busy ? "Loading..." : "Refresh"}
           </button>
+
+          <Link
+            href="/research/publish?from=derivatives"
+            className="flex h-11 items-center gap-2 rounded-lg border-2 border-blue-600 bg-blue-600 px-4 text-sm font-semibold text-white hover:border-blue-700 hover:bg-blue-700"
+          >
+            <span>📊</span>
+            <span>Publish to Research Stage</span>
+          </Link>
 
           {quote?.price && (
             <div className="rounded-lg border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold text-zinc-900">

@@ -79,7 +79,7 @@ export default function QuoteHeader({
           <div className="flex items-baseline gap-3">
             <h2 className="text-3xl font-bold text-zinc-900">{symbol}</h2>
             <span className="text-2xl font-semibold text-zinc-900">
-              ${price.toFixed(2)}
+              ${(price ?? 0).toFixed(2)}
             </span>
           </div>
           <div className="flex items-center gap-2">
@@ -89,7 +89,7 @@ export default function QuoteHeader({
               }`}
             >
               {isPositive ? "+" : ""}
-              {change.toFixed(2)}
+              {(change ?? 0).toFixed(2)}
             </span>
             <span
               className={`text-sm font-semibold ${
@@ -97,7 +97,7 @@ export default function QuoteHeader({
               }`}
             >
               ({isPositive ? "+" : ""}
-              {changePercent.toFixed(2)}%)
+              {(changePercent ?? 0).toFixed(2)}%)
             </span>
             <span className="text-xs text-zinc-500">Today</span>
           </div>

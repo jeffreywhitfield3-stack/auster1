@@ -76,8 +76,8 @@ export default function EventRiskPanel({
                 {ticker} has earnings in {daysUntil === 0 ? "today" : daysUntil === 1 ? "1 day" : `${daysUntil} days`}
               </p>
               <p className={`mt-1 font-mono text-xs ${style.text}`}>
-                Expected move: ±${earningsEvent.(expectedMove ?? 0).toFixed(2)} (
-                {earningsEvent.expectedMovePct.toFixed(1)}%)
+                Expected move: ±${(earningsEvent.expectedMove ?? 0).toFixed(2)} (
+                {(earningsEvent.expectedMovePct ?? 0).toFixed(1)}%)
               </p>
             </div>
           </div>
@@ -112,9 +112,9 @@ export default function EventRiskPanel({
             <div className="absolute left-1/2 top-0 h-full w-0.5 -translate-x-1/2 bg-zinc-900" />
           </div>
           <div className="mt-1 flex items-center justify-between text-[10px] text-zinc-600">
-            <span>${rangeLow.toFixed(0)}</span>
-            <span className="font-semibold">${earningsEvent.currentPrice.toFixed(0)}</span>
-            <span>${rangeHigh.toFixed(0)}</span>
+            <span>${(rangeLow ?? 0).toFixed(0)}</span>
+            <span className="font-semibold">${(earningsEvent.currentPrice ?? 0).toFixed(0)}</span>
+            <span>${(rangeHigh ?? 0).toFixed(0)}</span>
           </div>
         </div>
 
@@ -203,8 +203,8 @@ export default function EventRiskPanel({
             Expected Move
           </span>
           <span className="font-mono text-lg font-bold text-zinc-900">
-            ±${earningsEvent.(expectedMove ?? 0).toFixed(2)} (
-            {earningsEvent.expectedMovePct.toFixed(1)}%)
+            ±${(earningsEvent.expectedMove ?? 0).toFixed(2)} (
+            {(earningsEvent.expectedMovePct ?? 0).toFixed(1)}%)
           </span>
         </div>
 
@@ -221,14 +221,14 @@ export default function EventRiskPanel({
           <div className="flex items-center justify-between text-sm font-mono">
             <span className="text-zinc-600">${(rangeLow ?? 0).toFixed(2)}</span>
             <span className="font-semibold text-zinc-900">
-              ${earningsEvent.(currentPrice ?? 0).toFixed(2)}
+              ${(earningsEvent.currentPrice ?? 0).toFixed(2)}
             </span>
             <span className="text-zinc-600">${(rangeHigh ?? 0).toFixed(2)}</span>
           </div>
         </div>
 
         <p className="mt-3 text-xs text-zinc-600">
-          Based on ATM straddle price of ${earningsEvent.(atmStraddle ?? 0).toFixed(2)} × 0.85.
+          Based on ATM straddle price of ${(earningsEvent.atmStraddle ?? 0).toFixed(2)} × 0.85.
           Represents ~68% probability range (1 standard deviation).
         </p>
       </div>

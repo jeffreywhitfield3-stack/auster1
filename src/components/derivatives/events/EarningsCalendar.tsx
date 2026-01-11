@@ -146,14 +146,14 @@ export default function EarningsCalendar({
                         </span>
                       </td>
                       <td className="px-4 py-3 font-mono text-sm text-zinc-900">
-                        ${event.(currentPrice ?? 0).toFixed(2)}
+                        ${(event.currentPrice ?? 0).toFixed(2)}
                       </td>
                       <td className="px-4 py-3">
                         <Tip
                           label={
                             <span className="font-mono text-sm text-zinc-900">
-                              ±${event.(expectedMove ?? 0).toFixed(2)} (
-                              {event.expectedMovePct.toFixed(1)}%)
+                              ±${(event.expectedMove ?? 0).toFixed(2)} (
+                              {(event.expectedMovePct ?? 0).toFixed(1)}%)
                             </span>
                           }
                         >
@@ -165,8 +165,8 @@ export default function EarningsCalendar({
                           </p>
                           <p className="text-[11px] text-zinc-600">
                             Based on ATM straddle: $
-                            {event.(atmStraddle ?? 0).toFixed(2)} × 0.85 = $
-                            {event.(expectedMove ?? 0).toFixed(2)}
+                            {(event.atmStraddle ?? 0).toFixed(2)} × 0.85 = $
+                            {(event.expectedMove ?? 0).toFixed(2)}
                           </p>
                         </Tip>
                       </td>

@@ -6,13 +6,11 @@ import PositionCard from "./PositionCard";
 import PositionAlerts from "./PositionAlerts";
 import TradeHistory from "./TradeHistory";
 import {
-  mockActivePositions,
-  mockClosedPositions,
   Position,
 } from "@/lib/derivatives/mock-positions";
 
 export default function MyPositions() {
-  const [positions] = useState<Position[]>(mockActivePositions);
+  const [positions, setPositions] = useState<Position[]>([]);
 
   // Placeholder handlers for position actions
   const handleViewChart = (position: Position) => {
@@ -84,7 +82,7 @@ export default function MyPositions() {
       </div>
 
       {/* Trade History */}
-      <TradeHistory closedPositions={mockClosedPositions} />
+      <TradeHistory closedPositions={[]} />
 
       {/* Educational Note */}
       <div className="rounded-2xl border border-purple-200 bg-purple-50 p-5">

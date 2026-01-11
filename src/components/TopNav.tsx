@@ -67,25 +67,6 @@ export default function TopNav() {
       description: "Economic research environment",
       icon: "🏛",
     },
-    {
-      name: "Housing Feasibility",
-      href: "/products/housing",
-      description: "Real estate analysis",
-      icon: "🏠",
-    },
-    {
-      name: "DCF / Valuation Studio",
-      href: "/products/valuation",
-      description: "Discounted cash flow modeling",
-      icon: "💰",
-      divider: true,
-    },
-    {
-      name: "Portfolio & Risk Lab",
-      href: "/products/portfolio",
-      description: "Portfolio optimization",
-      icon: "📈",
-    },
   ];
 
   return (

@@ -60,29 +60,41 @@ export default function AdminBlogPage() {
   const [activeId, setActiveId] = useState<string | null>(null);
   const active = posts.find((p) => p.id === activeId) ?? null;
 
+  // Stats
+  const stats = {
+    total: posts.length,
+    published: posts.filter((p) => p.published).length,
+    drafts: posts.filter((p) => !p.published).length,
+  };
+
   // --------- auth gate (robust) ----------
   async function checkAccess() {
     setChecking(true);
     setAccessErr("");
 
     try {
-      // 1) try fast session read
       let sessionEmail: string | null = null;
 
       try {
-        const sessionRes: any = await withTimeout(supabase.auth.getSession() as any, 2500, "getSession timeout");
+        const sessionRes: any = await withTimeout(
+          supabase.auth.getSession() as any,
+          2500,
+          "getSession timeout"
+        );
         sessionEmail = sessionRes?.data?.session?.user?.email ?? null;
       } catch {
         // ignore, fall back to getUser
       }
 
-      // 2) fallback: getUser (server verification)
       if (!sessionEmail) {
         try {
-          const userRes: any = await withTimeout(supabase.auth.getUser() as any, 5000, "getUser timeout");
+          const userRes: any = await withTimeout(
+            supabase.auth.getUser() as any,
+            5000,
+            "getUser timeout"
+          );
           sessionEmail = userRes?.data?.user?.email ?? null;
         } catch (e: any) {
-          // still allow onAuthStateChange to resolve later
           setAccessErr(String(e?.message || e));
         }
       }
@@ -98,17 +110,17 @@ export default function AdminBlogPage() {
   useEffect(() => {
     let alive = true;
 
-    // initial check
     checkAccess();
 
-    // update if auth state changes (late cookie/session, sign in/out, refresh token)
-    const { data: sub } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
-      if (!alive) return;
-      const e = session?.user?.email ?? null;
-      setEmail(e);
-      setIsAdmin((e || "").toLowerCase() === ADMIN_EMAIL.toLowerCase());
-      setChecking(false);
-    });
+    const { data: sub } = supabase.auth.onAuthStateChange(
+      (_event: any, session: any) => {
+        if (!alive) return;
+        const e = session?.user?.email ?? null;
+        setEmail(e);
+        setIsAdmin((e || "").toLowerCase() === ADMIN_EMAIL.toLowerCase());
+        setChecking(false);
+      }
+    );
 
     return () => {
       alive = false;
@@ -194,7 +206,7 @@ export default function AdminBlogPage() {
 
   async function del() {
     if (!active) return;
-    if (!confirm("Delete this post?")) return;
+    if (!confirm("Delete this post? This action cannot be undone.")) return;
 
     setErr("");
     const { error } = await supabase.from("blog_posts").delete().eq("id", active.id);
@@ -231,12 +243,14 @@ export default function AdminBlogPage() {
   if (checking) {
     return (
       <main className="mx-auto max-w-6xl p-6">
-        <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
-          <div className="text-sm font-semibold text-zinc-900">Loading…</div>
-          <div className="mt-2 text-sm text-zinc-600">Checking admin access.</div>
+        <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+          <div className="text-sm font-semibold text-zinc-900">Checking access...</div>
+          <div className="mt-2 text-sm text-zinc-600">
+            Verifying admin permissions.
+          </div>
 
           {accessErr ? (
-            <div className="mt-3 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+            <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
               {accessErr}
             </div>
           ) : null}
@@ -244,13 +258,13 @@ export default function AdminBlogPage() {
           <div className="mt-4 flex gap-2">
             <button
               onClick={checkAccess}
-              className="rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm font-semibold text-zinc-900 hover:bg-zinc-50"
+              className="rounded-xl border border-zinc-300 bg-white px-4 py-2 text-sm font-semibold text-zinc-900 hover:bg-zinc-50"
             >
               Retry
             </button>
             <button
               onClick={() => router.replace("/login?next=/app/admin/blog")}
-              className="rounded-xl bg-zinc-900 px-3 py-2 text-sm font-semibold text-white hover:bg-zinc-800"
+              className="rounded-xl bg-zinc-900 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-800"
             >
               Go to login
             </button>
@@ -263,22 +277,26 @@ export default function AdminBlogPage() {
   if (!isAdmin) {
     return (
       <main className="mx-auto max-w-6xl p-6">
-        <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
-          <div className="text-sm font-semibold text-zinc-900">Admin Blog</div>
+        <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+          <div className="text-lg font-semibold text-zinc-900">Access Denied</div>
           <div className="mt-2 text-sm text-zinc-600">
             Signed in as: <span className="font-semibold">{email ?? "—"}</span>
           </div>
           <div className="mt-3 text-sm text-zinc-600">
-            This page is restricted to <span className="font-semibold">{ADMIN_EMAIL}</span>.
+            This page is restricted to{" "}
+            <span className="font-semibold">{ADMIN_EMAIL}</span>.
           </div>
 
           <div className="mt-4 flex gap-2">
-            <Link href="/blog" className="rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm font-semibold text-zinc-900 hover:bg-zinc-50">
+            <Link
+              href="/blog"
+              className="rounded-xl border border-zinc-300 bg-white px-4 py-2 text-sm font-semibold text-zinc-900 hover:bg-zinc-50"
+            >
               View blog
             </Link>
             <button
               onClick={() => router.replace("/login?next=/app/admin/blog")}
-              className="rounded-xl bg-zinc-900 px-3 py-2 text-sm font-semibold text-white hover:bg-zinc-800"
+              className="rounded-xl bg-zinc-900 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-800"
             >
               Switch account
             </button>
@@ -289,220 +307,339 @@ export default function AdminBlogPage() {
   }
 
   return (
-    <main className="mx-auto max-w-6xl p-6">
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <div className="text-2xl font-semibold text-zinc-900">Blog Dashboard</div>
-          <div className="mt-1 text-sm text-zinc-600">Create posts, upload covers, and publish.</div>
+    <main className="mx-auto max-w-7xl p-6">
+      {/* Header */}
+      <div className="mb-6">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-semibold text-zinc-900">
+              Content Management
+            </h1>
+            <p className="mt-1 text-sm text-zinc-600">
+              Manage blog posts and weekly market briefs
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Link
+              href="/app/admin/briefs"
+              className="inline-flex items-center gap-2 rounded-xl border border-blue-300 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-100"
+            >
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                />
+              </svg>
+              Weekly Briefs
+            </Link>
+            <Link
+              href="/blog"
+              className="rounded-xl border border-zinc-300 bg-white px-4 py-2 text-sm font-semibold text-zinc-900 hover:bg-zinc-50"
+            >
+              View blog
+            </Link>
+          </div>
         </div>
-        <div className="flex gap-2">
-          <Link
-            href="/app/admin/briefs"
-            className="rounded-xl border border-blue-300 bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-100"
-          >
-            📧 Weekly Briefs
-          </Link>
-          <button
-            onClick={createNew}
-            className="rounded-xl bg-zinc-900 px-3 py-2 text-sm font-semibold text-white hover:bg-zinc-800"
-          >
-            New post
-          </button>
-          <Link
-            href="/blog"
-            className="rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm font-semibold text-zinc-900 hover:bg-zinc-50"
-          >
-            View blog
-          </Link>
+
+        {/* Stats */}
+        <div className="mt-6 grid gap-4 sm:grid-cols-3">
+          <div className="rounded-xl border border-zinc-200 bg-white p-4">
+            <div className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+              Total Posts
+            </div>
+            <div className="mt-2 text-2xl font-semibold text-zinc-900">
+              {stats.total}
+            </div>
+          </div>
+          <div className="rounded-xl border border-zinc-200 bg-white p-4">
+            <div className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+              Published
+            </div>
+            <div className="mt-2 text-2xl font-semibold text-emerald-600">
+              {stats.published}
+            </div>
+          </div>
+          <div className="rounded-xl border border-zinc-200 bg-white p-4">
+            <div className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+              Drafts
+            </div>
+            <div className="mt-2 text-2xl font-semibold text-zinc-600">
+              {stats.drafts}
+            </div>
+          </div>
         </div>
       </div>
 
+      {/* Error message */}
       {err ? (
-        <div className="mb-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{err}</div>
+        <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          {err}
+        </div>
       ) : null}
 
+      {/* Main content */}
       <div className="grid gap-6 lg:grid-cols-12">
+        {/* Sidebar - Posts list */}
         <div className="lg:col-span-4">
-          <div className="rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm">
-            <div className="mb-2 text-sm font-semibold text-zinc-900">Posts</div>
+          <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-zinc-900">Blog Posts</h2>
+              <button
+                onClick={createNew}
+                className="rounded-lg bg-zinc-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-zinc-800"
+              >
+                + New
+              </button>
+            </div>
 
             {loadingPosts ? (
-              <div className="p-3 text-sm text-zinc-600">Loading…</div>
+              <div className="flex items-center justify-center py-12 text-sm text-zinc-500">
+                Loading posts...
+              </div>
             ) : posts.length === 0 ? (
-              <div className="p-3 text-sm text-zinc-600">No posts yet.</div>
+              <div className="py-12 text-center">
+                <div className="text-sm text-zinc-600">No posts yet</div>
+                <button
+                  onClick={createNew}
+                  className="mt-3 text-sm font-semibold text-zinc-900 underline"
+                >
+                  Create your first post
+                </button>
+              </div>
             ) : (
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 {posts.map((p) => (
                   <button
                     key={p.id}
                     onClick={() => setActiveId(p.id)}
-                    className={[
-                      "w-full rounded-xl px-3 py-2 text-left text-sm hover:bg-zinc-50",
-                      activeId === p.id ? "bg-zinc-50" : "",
-                    ].join(" ")}
+                    className={`w-full rounded-lg px-3 py-2.5 text-left transition-colors ${
+                      activeId === p.id
+                        ? "bg-zinc-100"
+                        : "hover:bg-zinc-50"
+                    }`}
                   >
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="font-semibold text-zinc-900">{p.title || "Untitled"}</div>
-                      <div
-                        className={[
-                          "rounded-lg px-2 py-1 text-xs font-semibold",
-                          p.published ? "bg-emerald-50 text-emerald-700" : "bg-zinc-100 text-zinc-700",
-                        ].join(" ")}
-                      >
-                        {p.published ? "Published" : "Draft"}
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate text-sm font-semibold text-zinc-900">
+                          {p.title || "Untitled"}
+                        </div>
+                        <div className="mt-1 truncate text-xs text-zinc-500">
+                          /{p.slug}
+                        </div>
                       </div>
+                      <span
+                        className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                          p.published
+                            ? "bg-emerald-50 text-emerald-700"
+                            : "bg-zinc-100 text-zinc-600"
+                        }`}
+                      >
+                        {p.published ? "Live" : "Draft"}
+                      </span>
                     </div>
-                    <div className="mt-1 truncate text-xs text-zinc-600">/{p.slug}</div>
                   </button>
                 ))}
               </div>
             )}
 
-            <div className="mt-3 flex gap-2">
-              <button
-                onClick={loadPosts}
-                className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm font-semibold text-zinc-900 hover:bg-zinc-50"
-              >
-                Refresh
-              </button>
-            </div>
+            <button
+              onClick={loadPosts}
+              className="mt-4 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm font-semibold text-zinc-900 hover:bg-zinc-50"
+            >
+              Refresh
+            </button>
           </div>
         </div>
 
+        {/* Main content - Editor */}
         <div className="lg:col-span-8">
           {!active ? (
-            <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm text-sm text-zinc-600">
-              Select a post to edit.
+            <div className="flex h-96 items-center justify-center rounded-2xl border border-zinc-200 bg-white shadow-sm">
+              <div className="text-center">
+                <div className="text-sm text-zinc-600">
+                  Select a post to edit or create a new one
+                </div>
+              </div>
             </div>
           ) : (
-            <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <div className="text-sm font-semibold text-zinc-900">Editor</div>
-                  <div className="mt-1 text-xs text-zinc-600">
-                    Public URL:{" "}
-                    <Link href={`/blog/${active.slug}`} className="font-semibold text-zinc-900 underline">
-                      /blog/{active.slug}
-                    </Link>
+            <div className="space-y-4">
+              {/* Editor header */}
+              <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-semibold text-zinc-900">
+                      Edit Post
+                    </div>
+                    <div className="mt-1 flex items-center gap-2 text-xs text-zinc-500">
+                      <span>Public URL:</span>
+                      <Link
+                        href={`/blog/${active.slug}`}
+                        className="font-mono font-semibold text-blue-600 hover:underline"
+                      >
+                        /blog/{active.slug}
+                      </Link>
+                    </div>
                   </div>
-                </div>
 
-                <div className="flex gap-2">
-                  <button
-                    onClick={togglePublish}
-                    className={[
-                      "rounded-xl px-3 py-2 text-sm font-semibold",
-                      active.published
-                        ? "border border-zinc-300 bg-white text-zinc-900 hover:bg-zinc-50"
-                        : "bg-zinc-900 text-white hover:bg-zinc-800",
-                    ].join(" ")}
-                  >
-                    {active.published ? "Unpublish" : "Publish"}
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={togglePublish}
+                      className={`rounded-lg px-4 py-2 text-sm font-semibold ${
+                        active.published
+                          ? "border border-zinc-300 bg-white text-zinc-900 hover:bg-zinc-50"
+                          : "bg-zinc-900 text-white hover:bg-zinc-800"
+                      }`}
+                    >
+                      {active.published ? "Unpublish" : "Publish"}
+                    </button>
 
-                  <button
-                    onClick={del}
-                    className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700 hover:bg-red-100"
-                  >
-                    Delete
-                  </button>
+                    <button
+                      onClick={del}
+                      className="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-100"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
               </div>
 
-              <div className="mt-5 grid gap-4">
-                <div>
-                  <div className="text-sm font-semibold text-zinc-900">Title</div>
-                  <input
-                    value={active.title}
-                    onChange={(e) => {
-                      const title = e.target.value;
-                      setPosts((prev) => prev.map((x) => (x.id === active.id ? { ...x, title } : x)));
-                    }}
-                    onBlur={() => savePatch({ title: active.title })}
-                    className="mt-2 w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm"
-                  />
-                </div>
-
-                <div>
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="text-sm font-semibold text-zinc-900">Slug</div>
-                    <button
-                      onClick={() => {
-                        const next = slugify(active.title || "post");
-                        setPosts((prev) => prev.map((x) => (x.id === active.id ? { ...x, slug: next } : x)));
-                        setTimeout(() => savePatch({ slug: next }), 0);
-                      }}
-                      className="text-xs font-semibold text-zinc-900 underline"
-                    >
-                      Auto-generate
-                    </button>
-                  </div>
-                  <input
-                    value={active.slug}
-                    onChange={(e) => {
-                      const slug = e.target.value;
-                      setPosts((prev) => prev.map((x) => (x.id === active.id ? { ...x, slug } : x)));
-                    }}
-                    onBlur={() => savePatch({ slug: active.slug })}
-                    className="mt-2 w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm"
-                  />
-                </div>
-
-                <div>
-                  <div className="text-sm font-semibold text-zinc-900">Excerpt</div>
-                  <textarea
-                    value={active.excerpt}
-                    onChange={(e) => {
-                      const excerpt = e.target.value;
-                      setPosts((prev) => prev.map((x) => (x.id === active.id ? { ...x, excerpt } : x)));
-                    }}
-                    onBlur={() => savePatch({ excerpt: active.excerpt })}
-                    className="mt-2 h-24 w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm"
-                  />
-                </div>
-
-                <div>
-                  <div className="text-sm font-semibold text-zinc-900">Cover image</div>
-                  <div className="mt-2 flex flex-wrap items-center gap-3">
-                    {coverUrl(active) ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        alt="cover"
-                        src={coverUrl(active) as string}
-                        className="h-20 w-32 rounded-xl object-cover border border-zinc-200"
-                      />
-                    ) : (
-                      <div className="flex h-20 w-32 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-50 text-xs text-zinc-600">
-                        No cover
-                      </div>
-                    )}
-
-                    <label className="cursor-pointer rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm font-semibold text-zinc-900 hover:bg-zinc-50">
-                      Upload cover
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) => {
-                          const f = e.target.files?.[0];
-                          if (f) uploadCover(f);
-                        }}
-                      />
+              {/* Editor form */}
+              <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+                <div className="space-y-5">
+                  {/* Title */}
+                  <div>
+                    <label className="block text-sm font-semibold text-zinc-900">
+                      Title
                     </label>
+                    <input
+                      value={active.title}
+                      onChange={(e) => {
+                        const title = e.target.value;
+                        setPosts((prev) =>
+                          prev.map((x) => (x.id === active.id ? { ...x, title } : x))
+                        );
+                      }}
+                      onBlur={() => savePatch({ title: active.title })}
+                      className="mt-2 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-zinc-400 focus:outline-none"
+                      placeholder="Enter post title..."
+                    />
                   </div>
-                </div>
 
-                <div>
-                  <div className="text-sm font-semibold text-zinc-900">Content (Markdown)</div>
-                  <textarea
-                    value={active.content_md}
-                    onChange={(e) => {
-                      const content_md = e.target.value;
-                      setPosts((prev) => prev.map((x) => (x.id === active.id ? { ...x, content_md } : x)));
-                    }}
-                    onBlur={() => savePatch({ content_md: active.content_md })}
-                    className="mt-2 h-[420px] w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 font-mono text-xs"
-                  />
+                  {/* Slug */}
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <label className="block text-sm font-semibold text-zinc-900">
+                        Slug
+                      </label>
+                      <button
+                        onClick={() => {
+                          const next = slugify(active.title || "post");
+                          setPosts((prev) =>
+                            prev.map((x) => (x.id === active.id ? { ...x, slug: next } : x))
+                          );
+                          setTimeout(() => savePatch({ slug: next }), 0);
+                        }}
+                        className="text-xs font-semibold text-blue-600 hover:underline"
+                      >
+                        Auto-generate
+                      </button>
+                    </div>
+                    <input
+                      value={active.slug}
+                      onChange={(e) => {
+                        const slug = e.target.value;
+                        setPosts((prev) =>
+                          prev.map((x) => (x.id === active.id ? { ...x, slug } : x))
+                        );
+                      }}
+                      onBlur={() => savePatch({ slug: active.slug })}
+                      className="mt-2 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 font-mono text-sm focus:border-zinc-400 focus:outline-none"
+                      placeholder="post-slug"
+                    />
+                  </div>
+
+                  {/* Excerpt */}
+                  <div>
+                    <label className="block text-sm font-semibold text-zinc-900">
+                      Excerpt
+                    </label>
+                    <textarea
+                      value={active.excerpt}
+                      onChange={(e) => {
+                        const excerpt = e.target.value;
+                        setPosts((prev) =>
+                          prev.map((x) => (x.id === active.id ? { ...x, excerpt } : x))
+                        );
+                      }}
+                      onBlur={() => savePatch({ excerpt: active.excerpt })}
+                      className="mt-2 h-20 w-full resize-none rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-zinc-400 focus:outline-none"
+                      placeholder="Short description for previews and SEO..."
+                    />
+                  </div>
+
+                  {/* Cover image */}
+                  <div>
+                    <label className="block text-sm font-semibold text-zinc-900">
+                      Cover Image
+                    </label>
+                    <div className="mt-2 flex flex-wrap items-center gap-3">
+                      {coverUrl(active) ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          alt="cover"
+                          src={coverUrl(active) as string}
+                          className="h-24 w-40 rounded-lg border border-zinc-200 object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-24 w-40 items-center justify-center rounded-lg border border-dashed border-zinc-300 bg-zinc-50 text-xs text-zinc-500">
+                          No cover
+                        </div>
+                      )}
+
+                      <label className="cursor-pointer rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-semibold text-zinc-900 hover:bg-zinc-50">
+                        Upload
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const f = e.target.files?.[0];
+                            if (f) uploadCover(f);
+                          }}
+                        />
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  <div>
+                    <label className="block text-sm font-semibold text-zinc-900">
+                      Content (Markdown)
+                    </label>
+                    <textarea
+                      value={active.content_md}
+                      onChange={(e) => {
+                        const content_md = e.target.value;
+                        setPosts((prev) =>
+                          prev.map((x) =>
+                            x.id === active.id ? { ...x, content_md } : x
+                          )
+                        );
+                      }}
+                      onBlur={() => savePatch({ content_md: active.content_md })}
+                      className="mt-2 h-96 w-full resize-none rounded-lg border border-zinc-300 bg-white px-3 py-2 font-mono text-xs focus:border-zinc-400 focus:outline-none"
+                      placeholder="# Your content here...
+
+Use Markdown formatting."
+                    />
+                  </div>
                 </div>
               </div>
             </div>

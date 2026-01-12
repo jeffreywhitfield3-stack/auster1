@@ -103,11 +103,37 @@ export async function yahooExpirations(symbol: string): Promise<string[]> {
  */
 export async function yahooChain(symbol: string, expiration: string): Promise<MassiveChainSnapshot> {
   try {
-    // Convert YYYY-MM-DD to Unix timestamp
-    const expirationDate = new Date(expiration + "T00:00:00Z");
-    const expirationTimestamp = Math.floor(expirationDate.getTime() / 1000);
+    // First, get all available expirations to find the exact timestamp Yahoo uses
+    const allExpirationsUrl = `https://query1.finance.yahoo.com/v7/finance/options/${encodeURIComponent(symbol)}`;
+    const expirationsResponse = await fetchWithTimeout(allExpirationsUrl, 5000);
 
-    const url = `https://query1.finance.yahoo.com/v7/finance/options/${encodeURIComponent(symbol)}?date=${expirationTimestamp}`;
+    if (!expirationsResponse.ok) {
+      throw new Error(`Yahoo Finance returned ${expirationsResponse.status}`);
+    }
+
+    const expirationsData = await expirationsResponse.json();
+    const availableTimestamps = expirationsData?.optionChain?.result?.[0]?.expirationDates || [];
+
+    // Find the timestamp that matches our expiration date
+    const targetDate = new Date(expiration + "T00:00:00Z");
+    const targetDateStr = targetDate.toISOString().split("T")[0];
+
+    let matchingTimestamp: number | null = null;
+    for (const ts of availableTimestamps) {
+      const tsDate = new Date(ts * 1000);
+      const tsDateStr = tsDate.toISOString().split("T")[0];
+      if (tsDateStr === targetDateStr) {
+        matchingTimestamp = ts;
+        break;
+      }
+    }
+
+    if (!matchingTimestamp) {
+      throw new Error(`No matching expiration found for ${expiration}. Available: ${availableTimestamps.map((ts: number) => new Date(ts * 1000).toISOString().split("T")[0]).join(", ")}`);
+    }
+
+    // Now fetch the chain with the correct timestamp
+    const url = `https://query1.finance.yahoo.com/v7/finance/options/${encodeURIComponent(symbol)}?date=${matchingTimestamp}`;
     const response = await fetchWithTimeout(url, 5000);
 
     if (!response.ok) {

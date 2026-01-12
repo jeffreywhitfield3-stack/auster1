@@ -2,7 +2,7 @@
 // POST /api/briefs/send-existing
 
 import { NextRequest, NextResponse } from "next/server";
-import { createServerClient } from "@/lib/supabase/server";
+import { supabaseServer } from "@/lib/supabase/server";
 import {
   resend,
   EMAIL_CONFIG,
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     const isCron = authHeader === `Bearer ${process.env.CRON_SECRET}`;
 
     if (!isCron) {
-      const supabase = await createServerClient();
+      const supabase = await supabaseServer();
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = await createServerClient();
+    const supabase = await supabaseServer();
 
     // Get the brief
     const { data: brief, error: briefError } = await supabase

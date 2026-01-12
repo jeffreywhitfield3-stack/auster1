@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { createBrowserClient } from "@/lib/supabase-browser";
+import { supabaseBrowser } from "@/lib/supabase-browser";
 
 type TradeIdea = {
   symbol: string;
@@ -71,7 +71,7 @@ export default function AdminBriefsClient() {
 
   // Check if user is admin
   const [isAdmin, setIsAdmin] = useState(false);
-  const supabase = createBrowserClient();
+  const supabase = supabaseBrowser();
 
   useEffect(() => {
     const checkAdmin = async () => {

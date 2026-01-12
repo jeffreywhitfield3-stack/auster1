@@ -296,6 +296,12 @@ export default function AdminBlogPage() {
           <div className="mt-1 text-sm text-zinc-600">Create posts, upload covers, and publish.</div>
         </div>
         <div className="flex gap-2">
+          <Link
+            href="/app/admin/briefs"
+            className="rounded-xl border border-blue-300 bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-100"
+          >
+            📧 Weekly Briefs
+          </Link>
           <button
             onClick={createNew}
             className="rounded-xl bg-zinc-900 px-3 py-2 text-sm font-semibold text-white hover:bg-zinc-800"

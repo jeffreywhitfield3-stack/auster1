@@ -1,5 +1,4 @@
 // src/lib/derivatives/massive.ts
-import { polygonRateLimiter } from "./rate-limiter";
 import { quoteCache, chainCache, expirationsCache } from "./cache";
 import { yahooQuote, yahooExpirations, yahooChain } from "./yahoo-fallback";
 
@@ -64,33 +63,31 @@ async function massiveFetch<T>(path: string, opts: MassiveFetchOptions = {}): Pr
     u.searchParams.set("apiKey", key);
   }
 
-  // Use rate limiter to queue the request
-  return polygonRateLimiter.enqueue(async () => {
-    const r = await fetch(u.toString(), {
-      cache: "no-store",
-      headers: USE_BEARER_AUTH
-        ? {
-            Authorization: `Bearer ${key}`,
-            "content-type": "application/json",
-          }
-        : {
-            "content-type": "application/json",
-          },
-    });
-
-    const text = await r.text();
-
-    // Helpful error bubble-up (keeps upstream JSON visible)
-    if (!r.ok) {
-      throw new Error(`massive_http_${r.status}: ${text.slice(0, 500)}`);
-    }
-
-    try {
-      return JSON.parse(text) as T;
-    } catch {
-      throw new Error(`massive_bad_json: ${text.slice(0, 500)}`);
-    }
+  // Direct fetch - Yahoo fallback handles rate limits
+  const r = await fetch(u.toString(), {
+    cache: "no-store",
+    headers: USE_BEARER_AUTH
+      ? {
+          Authorization: `Bearer ${key}`,
+          "content-type": "application/json",
+        }
+      : {
+          "content-type": "application/json",
+        },
   });
+
+  const text = await r.text();
+
+  // Helpful error bubble-up (keeps upstream JSON visible)
+  if (!r.ok) {
+    throw new Error(`massive_http_${r.status}: ${text.slice(0, 500)}`);
+  }
+
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    throw new Error(`massive_bad_json: ${text.slice(0, 500)}`);
+  }
 }
 
 /**

@@ -31,7 +31,8 @@ export class RateLimiter {
   }
 
   private async processQueue() {
-    if (this.processing || this.queue.length === 0) return;
+    if (this.processing) return;
+    if (this.queue.length === 0) return;
 
     this.processing = true;
 
@@ -59,6 +60,11 @@ export class RateLimiter {
     }
 
     this.processing = false;
+
+    // Check if more items were added while we were processing
+    if (this.queue.length > 0) {
+      this.processQueue();
+    }
   }
 
   /**

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { createBrowserClient } from "@/lib/supabase-browser";
+import { supabaseBrowser } from "@/lib/supabase-browser";
 
 type NotificationPreferences = {
   weekly_briefs: boolean;
@@ -26,7 +26,7 @@ export default function NotificationsClient() {
     text: string;
   } | null>(null);
 
-  const supabase = createBrowserClient();
+  const supabase = supabaseBrowser();
 
   useEffect(() => {
     const fetchPreferences = async () => {

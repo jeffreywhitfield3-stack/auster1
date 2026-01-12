@@ -2,7 +2,7 @@
 // POST /api/briefs/publish
 
 import { NextRequest, NextResponse } from "next/server";
-import { createServerClient } from "@/lib/supabase/server";
+import { supabaseServer } from "@/lib/supabase/server";
 import {
   resend,
   EMAIL_CONFIG,
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = await createServerClient();
+    const supabase = await supabaseServer();
 
     // Check if user is admin
     const {

@@ -3,7 +3,7 @@
 // Cron expression: "0 18 * * 0"
 
 import { NextRequest, NextResponse } from "next/server";
-import { createServerClient } from "@/lib/supabase/server";
+import { supabaseServer } from "@/lib/supabase/server";
 
 export const maxDuration = 300; // 5 minutes max execution time
 export const dynamic = "force-dynamic";
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const supabase = await createServerClient();
+    const supabase = await supabaseServer();
 
     // Check if a brief has already been sent this week
     const today = new Date();

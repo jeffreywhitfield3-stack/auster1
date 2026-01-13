@@ -22,6 +22,7 @@ export default function LoginClient() {
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState<string>("");
   const [loading, setLoading] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -64,50 +65,129 @@ export default function LoginClient() {
     setLoading(false);
   }
 
+  async function onForgotPassword(e: React.FormEvent) {
+    e.preventDefault();
+
+    if (!email.trim()) {
+      setStatus("Please enter your email address");
+      return;
+    }
+
+    setLoading(true);
+    setStatus("Sending password reset email…");
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+
+    if (error) {
+      setStatus(error.message);
+      setLoading(false);
+      return;
+    }
+
+    setStatus("Password reset email sent! Check your inbox.");
+    setLoading(false);
+    setShowForgotPassword(false);
+  }
+
   return (
     <main className="mx-auto max-w-md p-6">
       <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
-        <div className="text-sm font-semibold">Login</div>
+        <div className="text-sm font-semibold">
+          {showForgotPassword ? "Reset Password" : "Login"}
+        </div>
         {status ? <div className="mt-2 text-sm text-zinc-600">{status}</div> : null}
 
-        <form className="mt-4 space-y-3" onSubmit={onSubmit}>
-          <input
-            className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            autoComplete="email"
-          />
-          <input
-            className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm"
-            placeholder="Password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            autoComplete="current-password"
-          />
+        {!showForgotPassword ? (
+          <>
+            <form className="mt-4 space-y-3" onSubmit={onSubmit}>
+              <input
+                className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                autoComplete="email"
+              />
+              <input
+                className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm"
+                placeholder="Password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete="current-password"
+              />
 
-          <button
-            disabled={loading}
-            type="submit"
-            className="w-full rounded-xl bg-zinc-900 px-3 py-2 text-sm font-semibold text-white hover:bg-zinc-800 disabled:opacity-60"
-          >
-            Sign in
-          </button>
+              <button
+                disabled={loading}
+                type="submit"
+                className="w-full rounded-xl bg-zinc-900 px-3 py-2 text-sm font-semibold text-white hover:bg-zinc-800 disabled:opacity-60"
+              >
+                Sign in
+              </button>
 
-          <button
-            disabled={loading}
-            onClick={onSignup}
-            className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm font-semibold text-zinc-900 hover:bg-zinc-50 disabled:opacity-60"
-          >
-            Create account
-          </button>
-        </form>
+              <button
+                disabled={loading}
+                onClick={onSignup}
+                className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm font-semibold text-zinc-900 hover:bg-zinc-50 disabled:opacity-60"
+              >
+                Create account
+              </button>
+            </form>
 
-        <div className="mt-4 text-xs text-zinc-500">
-          After signing in you’ll be redirected to:{" "}
-          <span className="font-mono text-zinc-700">{nextUrl}</span>
-        </div>
+            <div className="mt-4 flex items-center justify-between text-xs">
+              <button
+                onClick={() => {
+                  setShowForgotPassword(true);
+                  setStatus("");
+                }}
+                className="text-blue-600 hover:text-blue-800 hover:underline"
+              >
+                Forgot password?
+              </button>
+              <span className="text-zinc-500">
+                Redirects to:{" "}
+                <span className="font-mono text-zinc-700">{nextUrl}</span>
+              </span>
+            </div>
+          </>
+        ) : (
+          <>
+            <form className="mt-4 space-y-3" onSubmit={onForgotPassword}>
+              <p className="text-xs text-zinc-600">
+                Enter your email address and we'll send you a link to reset your password.
+              </p>
+              <input
+                className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                autoComplete="email"
+                required
+              />
+
+              <button
+                disabled={loading}
+                type="submit"
+                className="w-full rounded-xl bg-zinc-900 px-3 py-2 text-sm font-semibold text-white hover:bg-zinc-800 disabled:opacity-60"
+              >
+                Send reset email
+              </button>
+
+              <button
+                disabled={loading}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setShowForgotPassword(false);
+                  setStatus("");
+                }}
+                className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm font-semibold text-zinc-900 hover:bg-zinc-50 disabled:opacity-60"
+              >
+                Back to login
+              </button>
+            </form>
+          </>
+        )}
       </div>
     </main>
   );

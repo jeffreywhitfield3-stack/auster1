@@ -12,10 +12,11 @@ import ScreenersTab from "@/components/derivatives/screeners/ScreenersTab";
 import EventsTab from "@/components/derivatives/events/EventsTab";
 import MyPositions from "@/components/derivatives/positions/MyPositions";
 import BuilderTray from "@/components/derivatives/builder/BuilderTray";
+import Watchlist from "@/components/derivatives/shared/Watchlist";
 
 type EntMe = { is_paid: boolean; plan: string };
 
-type Tab = "chain" | "builder" | "screeners" | "events" | "positions";
+type Tab = "chain" | "builder" | "screeners" | "events" | "positions" | "watchlist";
 
 type Quote = { symbol: string; price: number | null; asOf?: string | null };
 type ExpResp = { symbol: string; expirations: string[] };
@@ -146,6 +147,7 @@ export default function DerivativesClient() {
     { id: "screeners" as const, name: "Screeners", icon: "🔍", description: "Find high-probability setups" },
     { id: "events" as const, name: "Events", icon: "📅", description: "Earnings & economic events" },
     { id: "positions" as const, name: "Positions", icon: "💼", description: "Track your trades" },
+    { id: "watchlist" as const, name: "Watchlist", icon: "⭐", description: "Track symbols with alerts" },
   ];
 
   const currentPrice = quote?.price ?? 0;
@@ -274,6 +276,15 @@ export default function DerivativesClient() {
         )}
 
         {activeTab === "positions" && <MyPositions />}
+
+        {activeTab === "watchlist" && (
+          <Watchlist
+            onSymbolClick={(sym) => {
+              setSymbol(sym);
+              setActiveTab("chain");
+            }}
+          />
+        )}
       </div>
 
       {/* Builder Tray (shows on Builder tab) */}
@@ -290,7 +301,7 @@ export default function DerivativesClient() {
       {/* Quick Tips Footer */}
       <div className="mt-8 rounded-xl border border-blue-200 bg-blue-50 p-5">
         <div className="text-sm font-semibold text-blue-900">Quick Navigation</div>
-        <div className="mt-2 grid gap-2 text-sm text-blue-800 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="mt-2 grid gap-2 text-sm text-blue-800 sm:grid-cols-2 lg:grid-cols-3">
           <div>
             <strong>Chain:</strong> View options chain, IV smile, select strikes
           </div>
@@ -305,6 +316,9 @@ export default function DerivativesClient() {
           </div>
           <div>
             <strong>Positions:</strong> Monitor and manage your trades
+          </div>
+          <div>
+            <strong>Watchlist:</strong> Track symbols with custom alerts
           </div>
         </div>
       </div>

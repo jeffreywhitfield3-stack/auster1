@@ -3,23 +3,27 @@
 
 "use client";
 
-import { OptionContract } from "@/types/derivatives";
+import type { MassiveOptionLeg } from "@/lib/derivatives/massive";
 
 interface GreeksTooltipProps {
-  contract: OptionContract;
+  contract: MassiveOptionLeg;
   type: "call" | "put";
-  underlyingPrice: number;
+  underlying: number;
+  x: number;
+  y: number;
 }
 
 export default function GreeksTooltip({
   contract,
   type,
-  underlyingPrice,
+  underlying,
+  x,
+  y,
 }: GreeksTooltipProps) {
   // Calculate mid price
   const midPrice = contract.bid && contract.ask
     ? (contract.bid + contract.ask) / 2
-    : contract.last || 0;
+    : 0;
 
   // Calculate break-even
   const breakEven = type === "call"
@@ -27,19 +31,26 @@ export default function GreeksTooltip({
     : contract.strike - midPrice;
 
   // Calculate Vol/OI ratio
-  const volOiRatio = contract.open_interest > 0
+  const volOiRatio = contract.open_interest && contract.open_interest > 0 && contract.volume
     ? contract.volume / contract.open_interest
     : 0;
 
   const isUnusualActivity = volOiRatio > 1;
 
   return (
-    <div className="absolute z-50 w-80 rounded-lg border border-neutral-700 bg-neutral-900 p-4 shadow-2xl">
+    <div
+      className="fixed z-50 w-80 rounded-lg border border-neutral-700 bg-neutral-900 p-4 shadow-2xl"
+      style={{
+        left: `${x}px`,
+        top: `${y - 10}px`,
+        transform: 'translate(-50%, -100%)',
+      }}
+    >
       {/* Header */}
       <div className="mb-3 border-b border-neutral-700 pb-2">
         <div className="flex items-center justify-between">
           <span className="text-sm font-semibold text-white">
-            {contract.symbol} {type.toUpperCase()}
+            {type.toUpperCase()}
           </span>
           <span className="text-xs text-neutral-400">
             Strike: ${contract.strike}
@@ -60,8 +71,8 @@ export default function GreeksTooltip({
           <span className="font-semibold text-white">${midPrice.toFixed(2)}</span>
         </div>
         <div className="flex justify-between text-sm">
-          <span className="text-neutral-400">Last</span>
-          <span className="text-white">${contract.last?.toFixed(2) || "—"}</span>
+          <span className="text-neutral-400">Volume</span>
+          <span className="text-white">{contract.volume?.toLocaleString() || "—"}</span>
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-blue-400">Break-Even</span>
@@ -88,19 +99,6 @@ export default function GreeksTooltip({
           </span>
         </div>
 
-        {/* Gamma */}
-        <div className="group flex justify-between text-sm">
-          <span className="flex items-center gap-1 text-neutral-400">
-            Γ Gamma
-            <span className="hidden group-hover:inline-block text-xs text-neutral-500">
-              (delta acceleration)
-            </span>
-          </span>
-          <span className="font-mono text-white">
-            {contract.gamma?.toFixed(4) || "—"}
-          </span>
-        </div>
-
         {/* Theta */}
         <div className="group flex justify-between text-sm">
           <span className="flex items-center gap-1 text-neutral-400">
@@ -114,31 +112,6 @@ export default function GreeksTooltip({
           </span>
         </div>
 
-        {/* Vega */}
-        <div className="group flex justify-between text-sm">
-          <span className="flex items-center gap-1 text-neutral-400">
-            ν Vega
-            <span className="hidden group-hover:inline-block text-xs text-neutral-500">
-              (IV sensitivity)
-            </span>
-          </span>
-          <span className="font-mono text-white">
-            {contract.vega?.toFixed(3) || "—"}
-          </span>
-        </div>
-
-        {/* Rho */}
-        <div className="group flex justify-between text-sm">
-          <span className="flex items-center gap-1 text-neutral-400">
-            ρ Rho
-            <span className="hidden group-hover:inline-block text-xs text-neutral-500">
-              (rate sensitivity)
-            </span>
-          </span>
-          <span className="font-mono text-white">
-            {contract.rho?.toFixed(3) || "—"}
-          </span>
-        </div>
       </div>
 
       {/* Implied Volatility */}

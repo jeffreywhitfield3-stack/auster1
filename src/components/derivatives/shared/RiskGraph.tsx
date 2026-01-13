@@ -4,7 +4,6 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { OptionContract } from "@/types/derivatives";
 import { X } from "lucide-react";
 import {
   LineChart,
@@ -19,10 +18,31 @@ import {
 } from "recharts";
 
 interface RiskGraphProps {
-  contract: OptionContract;
-  underlying: number;
-  daysToExpiration: number;
+  strike: number;
+  premium: number;
+  type: "call" | "put";
+  expiration: string;
+  currentPrice: number;
+  volatility: number;
   onClose: () => void;
+}
+
+// Error function (erf) approximation
+function erf(x: number): number {
+  const sign = x >= 0 ? 1 : -1;
+  x = Math.abs(x);
+
+  const a1 = 0.254829592;
+  const a2 = -0.284496736;
+  const a3 = 1.421413741;
+  const a4 = -1.453152027;
+  const a5 = 1.061405429;
+  const p = 0.3275911;
+
+  const t = 1 / (1 + p * x);
+  const y = 1 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+
+  return sign * y;
 }
 
 // Black-Scholes formula for option pricing
@@ -67,26 +87,35 @@ function blackScholes(
 }
 
 export default function RiskGraph({
-  contract,
-  underlying,
-  daysToExpiration,
+  strike,
+  premium,
+  type,
+  expiration,
+  currentPrice,
+  volatility,
   onClose,
 }: RiskGraphProps) {
+  // Calculate days to expiration
+  const daysToExpiration = useMemo(() => {
+    const expDate = new Date(expiration);
+    const today = new Date();
+    const diffTime = expDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return Math.max(0, diffDays);
+  }, [expiration]);
+
   const [priceRange, setPriceRange] = useState(20); // % range
   const [daysAhead, setDaysAhead] = useState(
     Math.floor(daysToExpiration / 2)
   );
 
-  const type = contract.symbol.includes("C") ? "call" : "put";
-  const premium = contract.last || 0;
-  const strike = contract.strike;
-  const sigma = contract.implied_volatility || 0.3; // Default to 30% IV
+  const sigma = volatility;
   const r = 0.05; // Risk-free rate (5%)
 
   // Generate price points for the graph
   const chartData = useMemo(() => {
-    const minPrice = underlying * (1 - priceRange / 100);
-    const maxPrice = underlying * (1 + priceRange / 100);
+    const minPrice = currentPrice * (1 - priceRange / 100);
+    const maxPrice = currentPrice * (1 + priceRange / 100);
     const step = (maxPrice - minPrice) / 100;
 
     const data = [];
@@ -114,7 +143,7 @@ export default function RiskGraph({
     }
 
     return data;
-  }, [underlying, priceRange, strike, premium, type, daysAhead, daysToExpiration, sigma, r]);
+  }, [currentPrice, priceRange, strike, premium, type, daysAhead, daysToExpiration, sigma, r]);
 
   // Calculate key metrics
   const metrics = useMemo(() => {
@@ -129,11 +158,11 @@ export default function RiskGraph({
       type === "call" ? strike + premium : strike - premium;
 
     // Probability of profit (rough estimate based on distance from current price)
-    const stdDev = underlying * sigma * Math.sqrt(daysToExpiration / 365);
-    const zScore = (breakEven - underlying) / stdDev;
+    const stdDev = currentPrice * sigma * Math.sqrt(daysToExpiration / 365);
+    const zScore = (breakEven - currentPrice) / stdDev;
     const probProfit = type === "call"
-      ? (1 - (1 + Math.erf(zScore / Math.sqrt(2))) / 2) * 100
-      : ((1 + Math.erf(zScore / Math.sqrt(2))) / 2) * 100;
+      ? (1 - (1 + erf(zScore / Math.sqrt(2))) / 2) * 100
+      : ((1 + erf(zScore / Math.sqrt(2))) / 2) * 100;
 
     return {
       maxProfit,
@@ -141,7 +170,7 @@ export default function RiskGraph({
       breakEven: breakEven.toFixed(2),
       probProfit: probProfit.toFixed(1),
     };
-  }, [type, strike, premium, underlying, sigma, daysToExpiration]);
+  }, [type, strike, premium, currentPrice, sigma, daysToExpiration]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
@@ -151,7 +180,7 @@ export default function RiskGraph({
           <div>
             <h2 className="text-xl font-bold text-white">Risk Graph</h2>
             <p className="text-sm text-neutral-400">
-              {contract.symbol} · Strike ${strike} · {type.toUpperCase()}
+              Strike ${strike} · {type.toUpperCase()}
             </p>
           </div>
           <button
@@ -215,7 +244,7 @@ export default function RiskGraph({
               <Legend />
               <ReferenceLine y={0} stroke="#666" strokeDasharray="3 3" />
               <ReferenceLine
-                x={underlying}
+                x={currentPrice}
                 stroke="#fbbf24"
                 strokeDasharray="3 3"
                 label={{ value: "Current", fill: "#fbbf24", fontSize: 12 }}

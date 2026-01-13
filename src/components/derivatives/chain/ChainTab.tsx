@@ -5,6 +5,11 @@ import QuoteHeader from "./QuoteHeader";
 import ExpirationPicker from "./ExpirationPicker";
 import ChainTable from "./ChainTable";
 import IVSmileChart from "./IVSmileChart";
+import OIHeatmap from "./OIHeatmap";
+import VolTermStructure from "./VolTermStructure";
+import RiskGraph from "../shared/RiskGraph";
+import BacktestEngine from "../shared/BacktestEngine";
+import HedgeSuggestions from "../shared/HedgeSuggestions";
 import type { MassiveChainSnapshot, MassiveOptionLeg } from "@/lib/derivatives/massive";
 
 interface ChainTabProps {
@@ -31,6 +36,15 @@ export default function ChainTab({ symbol, onContractSelect }: ChainTabProps) {
   const [liquidOnly, setLiquidOnly] = useState(true);
   const [showWeeklies, setShowWeeklies] = useState(true);
   const [showMonthlies, setShowMonthlies] = useState(true);
+
+  // Modal state
+  const [showRiskGraph, setShowRiskGraph] = useState(false);
+  const [showBacktest, setShowBacktest] = useState(false);
+  const [showHedge, setShowHedge] = useState(false);
+  const [selectedContract, setSelectedContract] = useState<{
+    contract: MassiveOptionLeg;
+    type: "call" | "put";
+  } | null>(null);
 
   // Fetch expirations when symbol changes
   useEffect(() => {
@@ -216,12 +230,57 @@ export default function ChainTab({ symbol, onContractSelect }: ChainTabProps) {
             </div>
           </div>
 
+          {/* Action Buttons */}
+          {selectedContract && (
+            <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+              <div className="mb-3 flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-semibold text-blue-900">
+                    Selected: {selectedContract.type.toUpperCase()} ${selectedContract.contract.strike.toFixed(2)}
+                  </h3>
+                  <p className="text-xs text-blue-700">
+                    Mid: ${((selectedContract.contract.bid ?? 0) + (selectedContract.contract.ask ?? 0)) / 2}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setSelectedContract(null)}
+                  className="text-sm text-blue-600 hover:text-blue-800"
+                >
+                  Clear
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setShowRiskGraph(true)}
+                  className="rounded-lg border border-blue-300 bg-white px-4 py-2 text-sm font-semibold text-blue-900 hover:bg-blue-100"
+                >
+                  📈 Risk Graph
+                </button>
+                <button
+                  onClick={() => setShowBacktest(true)}
+                  className="rounded-lg border border-blue-300 bg-white px-4 py-2 text-sm font-semibold text-blue-900 hover:bg-blue-100"
+                >
+                  🎲 Backtest
+                </button>
+                <button
+                  onClick={() => setShowHedge(true)}
+                  className="rounded-lg border border-blue-300 bg-white px-4 py-2 text-sm font-semibold text-blue-900 hover:bg-blue-100"
+                >
+                  🛡️ Hedge Suggestions
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Chain Table */}
           <ChainTable
             calls={chainData.calls}
             puts={chainData.puts}
             underlying={chainData.underlying}
-            onContractClick={onContractSelect}
+            onContractClick={(contract, type) => {
+              setSelectedContract({ contract, type });
+              onContractSelect?.(contract, type);
+            }}
             deltaMin={deltaMin}
             deltaMax={deltaMax}
             liquidOnly={liquidOnly}
@@ -233,7 +292,58 @@ export default function ChainTab({ symbol, onContractSelect }: ChainTabProps) {
             puts={chainData.puts}
             underlying={chainData.underlying}
           />
+
+          {/* OI Heatmap */}
+          <OIHeatmap
+            calls={chainData.calls}
+            puts={chainData.puts}
+            underlying={chainData.underlying}
+          />
+
+          {/* Volatility Term Structure */}
+          <VolTermStructure symbol={symbol} />
         </>
+      )}
+
+      {/* Modals */}
+      {showRiskGraph && selectedContract && quoteData && (
+        <RiskGraph
+          strike={selectedContract.contract.strike}
+          premium={((selectedContract.contract.bid ?? 0) + (selectedContract.contract.ask ?? 0)) / 2}
+          type={selectedContract.type}
+          expiration={selectedExpiration || ""}
+          currentPrice={quoteData.price}
+          volatility={selectedContract.contract.implied_volatility || 0.3}
+          onClose={() => setShowRiskGraph(false)}
+        />
+      )}
+
+      {showBacktest && selectedContract && quoteData && (
+        <BacktestEngine
+          symbol={symbol}
+          strike={selectedContract.contract.strike}
+          premium={((selectedContract.contract.bid ?? 0) + (selectedContract.contract.ask ?? 0)) / 2}
+          type={selectedContract.type}
+          expiration={selectedExpiration || ""}
+          currentPrice={quoteData.price}
+          volatility={selectedContract.contract.implied_volatility || 0.3}
+          onClose={() => setShowBacktest(false)}
+        />
+      )}
+
+      {showHedge && selectedContract && quoteData && (
+        <HedgeSuggestions
+          symbol={symbol}
+          currentPrice={quoteData.price}
+          position={{
+            type: selectedContract.type,
+            quantity: 1,
+            strike: selectedContract.contract.strike,
+            premium: ((selectedContract.contract.bid ?? 0) + (selectedContract.contract.ask ?? 0)) / 2,
+            expiration: selectedExpiration || "",
+          }}
+          onClose={() => setShowHedge(false)}
+        />
       )}
     </div>
   );

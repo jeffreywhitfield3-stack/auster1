@@ -191,7 +191,7 @@ export default function VolTermStructure({ symbol }: VolTermStructureProps) {
                 borderRadius: "8px",
               }}
               labelStyle={{ color: "#ffffff" }}
-              formatter={(value: number) => `${value.toFixed(2)}%`}
+              formatter={(value?: number) => value ? `${value.toFixed(2)}%` : ''}
             />
             <Legend />
             <Line

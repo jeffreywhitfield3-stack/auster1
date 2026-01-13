@@ -9,7 +9,11 @@ import { X, Play } from "lucide-react";
 interface BacktestEngineProps {
   symbol: string;
   strike: number;
+  premium: number;
   type: "call" | "put";
+  expiration: string;
+  currentPrice: number;
+  volatility: number;
   onClose: () => void;
 }
 
@@ -117,14 +121,18 @@ function runMonteCarloSimulation(
 export default function BacktestEngine({
   symbol,
   strike,
+  premium: initialPremium,
   type,
+  expiration,
+  currentPrice: initialCurrentPrice,
+  volatility: initialVolatility,
   onClose,
 }: BacktestEngineProps) {
   const [numSims, setNumSims] = useState(1000);
   const [daysToHold, setDaysToHold] = useState(30);
-  const [volatility, setVolatility] = useState(0.3);
-  const [initialPrice, setInitialPrice] = useState(strike);
-  const [premium, setPremium] = useState(5);
+  const [volatility, setVolatility] = useState(initialVolatility);
+  const [initialPrice, setInitialPrice] = useState(initialCurrentPrice);
+  const [premium, setPremium] = useState(initialPremium);
   const [results, setResults] = useState<SimulationResult | null>(null);
   const [running, setRunning] = useState(false);
 

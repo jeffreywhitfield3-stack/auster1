@@ -11,6 +11,7 @@ interface Position {
   quantity: number;
   strike?: number;
   premium?: number;
+  expiration?: string;
 }
 
 interface HedgeSuggestionsProps {

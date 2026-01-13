@@ -3,6 +3,7 @@
 import { useState } from "react";
 import LiquidityBadge from "../shared/LiquidityBadge";
 import Tip from "../Tip";
+import GreeksTooltip from "../shared/GreeksTooltip";
 import type { MassiveOptionLeg } from "@/lib/derivatives/massive";
 
 interface ChainTableProps {
@@ -58,6 +59,12 @@ export default function ChainTable({
   liquidOnly = false,
 }: ChainTableProps) {
   const [hoveredStrike, setHoveredStrike] = useState<number | null>(null);
+  const [hoveredContract, setHoveredContract] = useState<{
+    contract: MassiveOptionLeg;
+    type: "call" | "put";
+    x: number;
+    y: number;
+  } | null>(null);
 
   // Filter calls and puts based on criteria
   const filteredCalls = calls.filter((call) => {
@@ -179,6 +186,18 @@ export default function ChainTable({
                       call ? "hover:bg-green-100" : ""
                     }`}
                     onClick={() => call && onContractClick?.(call, "call")}
+                    onMouseEnter={(e) => {
+                      if (call) {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        setHoveredContract({
+                          contract: call,
+                          type: "call",
+                          x: rect.left + rect.width / 2,
+                          y: rect.top,
+                        });
+                      }
+                    }}
+                    onMouseLeave={() => setHoveredContract(null)}
                   >
                     {call?.bid?.toFixed(2) ?? "-"}
                   </td>
@@ -187,6 +206,18 @@ export default function ChainTable({
                       call ? "hover:bg-green-100" : ""
                     }`}
                     onClick={() => call && onContractClick?.(call, "call")}
+                    onMouseEnter={(e) => {
+                      if (call) {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        setHoveredContract({
+                          contract: call,
+                          type: "call",
+                          x: rect.left + rect.width / 2,
+                          y: rect.top,
+                        });
+                      }
+                    }}
+                    onMouseLeave={() => setHoveredContract(null)}
                   >
                     {call?.ask?.toFixed(2) ?? "-"}
                   </td>
@@ -231,6 +262,18 @@ export default function ChainTable({
                       put ? "hover:bg-red-100" : ""
                     }`}
                     onClick={() => put && onContractClick?.(put, "put")}
+                    onMouseEnter={(e) => {
+                      if (put) {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        setHoveredContract({
+                          contract: put,
+                          type: "put",
+                          x: rect.left + rect.width / 2,
+                          y: rect.top,
+                        });
+                      }
+                    }}
+                    onMouseLeave={() => setHoveredContract(null)}
                   >
                     {put?.ask?.toFixed(2) ?? "-"}
                   </td>
@@ -239,6 +282,18 @@ export default function ChainTable({
                       put ? "hover:bg-red-100" : ""
                     }`}
                     onClick={() => put && onContractClick?.(put, "put")}
+                    onMouseEnter={(e) => {
+                      if (put) {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        setHoveredContract({
+                          contract: put,
+                          type: "put",
+                          x: rect.left + rect.width / 2,
+                          y: rect.top,
+                        });
+                      }
+                    }}
+                    onMouseLeave={() => setHoveredContract(null)}
                   >
                     {put?.bid?.toFixed(2) ?? "-"}
                   </td>
@@ -363,6 +418,17 @@ export default function ChainTable({
           very wide spreads (&gt;20%). These are illiquid and risky to trade. Use
           limit orders or consider different strikes.
         </div>
+      )}
+
+      {/* Greeks Tooltip */}
+      {hoveredContract && (
+        <GreeksTooltip
+          contract={hoveredContract.contract}
+          type={hoveredContract.type}
+          underlying={underlying}
+          x={hoveredContract.x}
+          y={hoveredContract.y}
+        />
       )}
     </div>
   );

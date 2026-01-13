@@ -3,16 +3,16 @@
 
 "use client";
 
-import { OptionContract } from "@/types/derivatives";
+import type { MassiveOptionLeg } from "@/lib/derivatives/massive";
 import { useMemo } from "react";
 
 interface OIHeatmapProps {
-  calls: OptionContract[];
-  puts: OptionContract[];
-  underlyingPrice: number;
+  calls: MassiveOptionLeg[];
+  puts: MassiveOptionLeg[];
+  underlying: number;
 }
 
-export default function OIHeatmap({ calls, puts, underlyingPrice }: OIHeatmapProps) {
+export default function OIHeatmap({ calls, puts, underlying }: OIHeatmapProps) {
   // Find max OI for scaling
   const maxCallOI = useMemo(() => {
     return Math.max(...calls.map((c) => c.open_interest || 0), 1);
@@ -39,14 +39,14 @@ export default function OIHeatmap({ calls, puts, underlyingPrice }: OIHeatmapPro
         const putOI = put?.open_interest || 0;
 
         // Check for unusual activity
-        const callVolOI = call && call.open_interest > 0
+        const callVolOI = call && call.open_interest && call.open_interest > 0 && call.volume
           ? call.volume / call.open_interest
           : 0;
-        const putVolOI = put && put.open_interest > 0
+        const putVolOI = put && put.open_interest && put.open_interest > 0 && put.volume
           ? put.volume / put.open_interest
           : 0;
 
-        const isATM = Math.abs(strike - underlyingPrice) < underlyingPrice * 0.02; // Within 2%
+        const isATM = Math.abs(strike - underlying) < underlying * 0.02; // Within 2%
 
         return {
           strike,
@@ -59,7 +59,7 @@ export default function OIHeatmap({ calls, puts, underlyingPrice }: OIHeatmapPro
           isATM,
         };
       });
-  }, [calls, puts, underlyingPrice, maxCallOI, maxPutOI]);
+  }, [calls, puts, underlying, maxCallOI, maxPutOI]);
 
   return (
     <div className="rounded-lg border border-neutral-700 bg-neutral-800/50 p-4">

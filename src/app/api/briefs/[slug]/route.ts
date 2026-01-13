@@ -2,7 +2,7 @@
 // GET /api/briefs/[slug]
 
 import { NextRequest, NextResponse } from "next/server";
-import { supabaseServer } from "@/lib/supabase/server";
+import { createServerClient } from "@/lib/supabase/server";
 
 export async function GET(
   request: NextRequest,
@@ -11,7 +11,7 @@ export async function GET(
   try {
     const { slug } = await params;
 
-    const supabase = await supabaseServer();
+    const supabase = await createServerClient();
 
     // Get brief
     const { data: brief, error } = await supabase

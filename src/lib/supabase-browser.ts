@@ -1,8 +1,8 @@
 "use client";
 
-import { createBrowserClient } from "@supabase/ssr";
+import { createBrowserClient as createClient } from "@supabase/ssr";
 
-let cached: ReturnType<typeof createBrowserClient> | null = null;
+let cached: ReturnType<typeof createClient> | null = null;
 
 export function supabaseBrowser() {
   if (cached) return cached;
@@ -14,6 +14,11 @@ export function supabaseBrowser() {
     throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY");
   }
 
-  cached = createBrowserClient(url, anon);
+  cached = createClient(url, anon);
   return cached;
+}
+
+// Export as createBrowserClient for convenience
+export function createBrowserClient() {
+  return supabaseBrowser();
 }

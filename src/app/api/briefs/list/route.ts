@@ -2,7 +2,7 @@
 // GET /api/briefs/list
 
 import { NextRequest, NextResponse } from "next/server";
-import { supabaseServer } from "@/lib/supabase/server";
+import { createServerClient } from "@/lib/supabase/server";
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get("limit") || "10");
     const offset = parseInt(searchParams.get("offset") || "0");
 
-    const supabase = await supabaseServer();
+    const supabase = await createServerClient();
 
     // Get published briefs
     const { data: briefs, error } = await supabase

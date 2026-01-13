@@ -1,6 +1,6 @@
 // src/lib/supabase/server.ts
 import { cookies } from "next/headers";
-import { createServerClient } from "@supabase/ssr";
+import { createServerClient as createSupabaseServerClient } from "@supabase/ssr";
 
 export async function supabaseServer() {
   // Next 16 can return a promise in some contexts
@@ -12,7 +12,7 @@ export async function supabaseServer() {
     throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY");
   }
 
-  return createServerClient(url, anon, {
+  return createSupabaseServerClient(url, anon, {
     cookies: {
       getAll() {
         // Some Next versions/types can be picky; this keeps it resilient.
@@ -21,7 +21,7 @@ export async function supabaseServer() {
       },
       setAll(cookiesToSet) {
         // In Server Components (like layouts), setting cookies can throw or be ignored.
-        // That’s OK: your proxy (updateSession) is responsible for refresh/rotation.
+        // That's OK: your proxy (updateSession) is responsible for refresh/rotation.
         try {
           cookiesToSet.forEach(({ name, value, options }) => {
             cookieStore.set(name, value, options);
@@ -33,3 +33,6 @@ export async function supabaseServer() {
     },
   });
 }
+
+// Alias for convenience
+export { supabaseServer as createServerClient };

@@ -3,11 +3,17 @@
 
 import { Resend } from "resend";
 
-if (!process.env.RESEND_API_KEY) {
-  throw new Error("Missing RESEND_API_KEY environment variable");
-}
+// Use a dummy key during build time, real key required at runtime
+const RESEND_API_KEY = process.env.RESEND_API_KEY || "re_placeholder_key_for_build";
 
-export const resend = new Resend(process.env.RESEND_API_KEY);
+export const resend = new Resend(RESEND_API_KEY);
+
+// Runtime validation function
+export function validateResendKey() {
+  if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === "re_placeholder_key_for_build") {
+    throw new Error("Missing RESEND_API_KEY environment variable. Please configure it in your environment.");
+  }
+}
 
 // Email configuration
 export const EMAIL_CONFIG = {

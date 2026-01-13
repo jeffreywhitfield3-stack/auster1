@@ -2,7 +2,7 @@
 // POST /api/newsletter/subscribe
 
 import { NextRequest, NextResponse } from "next/server";
-import { supabaseServer } from "@/lib/supabase/server";
+import { createServerClient } from "@/lib/supabase/server";
 import { resend, EMAIL_TEMPLATES, replaceTemplateVars } from "@/lib/email/resend";
 
 export async function POST(request: NextRequest) {
@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = await supabaseServer();
+    const supabase = await createServerClient();
 
     // Get authenticated user (if logged in)
     const {

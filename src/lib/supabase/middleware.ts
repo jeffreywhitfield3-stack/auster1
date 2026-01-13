@@ -1,6 +1,6 @@
 // src/lib/supabase/middleware.ts
 import { NextResponse, type NextRequest } from "next/server";
-import { createServerClient } from "@supabase/ssr";
+import { createServerClient as createSupabaseServerClient } from "@supabase/ssr";
 
 export async function updateSession(req: NextRequest) {
   // Create an initial response
@@ -13,7 +13,7 @@ export async function updateSession(req: NextRequest) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-  const supabase = createServerClient(url, anon, {
+  const supabase = createSupabaseServerClient(url, anon, {
     cookies: {
       getAll() {
         return req.cookies.getAll();

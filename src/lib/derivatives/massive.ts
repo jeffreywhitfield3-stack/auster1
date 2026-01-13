@@ -91,7 +91,7 @@ async function massiveFetch<T>(path: string, opts: MassiveFetchOptions = {}): Pr
 }
 
 /**
- * Quote: try "last trade" style endpoint first, fallback to prev close.
+ * Quote: Use previous close agg endpoint (available on Options Starter plan).
  * With caching and Yahoo Finance fallback for rate-limited requests.
  */
 export async function massiveQuote(symbol: string): Promise<MassiveQuote> {
@@ -105,28 +105,17 @@ export async function massiveQuote(symbol: string): Promise<MassiveQuote> {
 
   // Try Polygon API
   try {
-    // Option A: last trade (Polygon-style)
-    type LastTradeResp = { results?: { p?: number; t?: number } };
-    try {
-      const j = await massiveFetch<LastTradeResp>(`/v2/last/trade/${encodeURIComponent(symbol)}`);
-      const price = typeof j?.results?.p === "number" ? j.results.p : null;
-      const asOf = typeof j?.results?.t === "number" ? new Date(j.results.t).toISOString() : null;
-      const result = { symbol, price, asOf };
-      quoteCache.set(cacheKey, result);
-      return result;
-    } catch {
-      // Option B: previous close agg (Polygon-style)
-      type PrevResp = { results?: Array<{ c?: number; t?: number }> };
-      const j2 = await massiveFetch<PrevResp>(`/v2/aggs/ticker/${encodeURIComponent(symbol)}/prev`, {
-        qs: { adjusted: true },
-      });
-      const row = Array.isArray(j2.results) && j2.results.length ? j2.results[0] : undefined;
-      const price = typeof row?.c === "number" ? row.c : null;
-      const asOf = typeof row?.t === "number" ? new Date(row.t).toISOString() : null;
-      const result = { symbol, price, asOf };
-      quoteCache.set(cacheKey, result);
-      return result;
-    }
+    // Use previous close agg (available on Options Starter plan)
+    type PrevResp = { results?: Array<{ c?: number; t?: number }> };
+    const j = await massiveFetch<PrevResp>(`/v2/aggs/ticker/${encodeURIComponent(symbol)}/prev`, {
+      qs: { adjusted: true },
+    });
+    const row = Array.isArray(j.results) && j.results.length ? j.results[0] : undefined;
+    const price = typeof row?.c === "number" ? row.c : null;
+    const asOf = typeof row?.t === "number" ? new Date(row.t).toISOString() : null;
+    const result = { symbol, price, asOf };
+    quoteCache.set(cacheKey, result);
+    return result;
   } catch (polygonError) {
     // If Polygon fails (rate limit or error), fall back to Yahoo Finance
     console.warn(`Polygon quote failed for ${symbol}, falling back to Yahoo:`, polygonError);

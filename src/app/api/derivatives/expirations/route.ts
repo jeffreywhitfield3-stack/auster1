@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { massiveExpirations } from "@/lib/derivatives/massive";
+import { getDefaultGateway } from "@/lib/market-data";
 import { supabaseServer } from "@/lib/supabase/server";
 import { getClientIp, hashIp } from "@/lib/ip";
 
@@ -40,7 +40,9 @@ export async function GET(req: Request) {
       );
     }
 
-    const expirations = await massiveExpirations(symbol);
+    // Use gateway instead of direct massiveExpirations call
+    const gateway = getDefaultGateway();
+    const expirations = await gateway.getExpirations(symbol);
     return NextResponse.json({ symbol, expirations });
   } catch (e: any) {
     return NextResponse.json({ error: "expirations_failed", detail: String(e?.message || e) }, { status: 500 });

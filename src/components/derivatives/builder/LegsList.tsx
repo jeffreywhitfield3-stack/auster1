@@ -147,7 +147,7 @@ export default function LegsList({
                           strike: Number(e.target.value),
                         })
                       }
-                      className="mt-1 w-full rounded-lg border border-zinc-300 px-2 py-1.5 text-sm"
+                      className="mt-1 w-full rounded-lg border border-zinc-300 bg-white text-zinc-900 px-2 py-1.5 text-sm"
                     />
                   </div>
                   <div>
@@ -164,7 +164,7 @@ export default function LegsList({
                           price: Number(e.target.value),
                         })
                       }
-                      className="mt-1 w-full rounded-lg border border-zinc-300 px-2 py-1.5 text-sm"
+                      className="mt-1 w-full rounded-lg border border-zinc-300 bg-white text-zinc-900 px-2 py-1.5 text-sm"
                     />
                   </div>
                   <div>
@@ -181,7 +181,7 @@ export default function LegsList({
                           quantity: Number(e.target.value),
                         })
                       }
-                      className="mt-1 w-full rounded-lg border border-zinc-300 px-2 py-1.5 text-sm"
+                      className="mt-1 w-full rounded-lg border border-zinc-300 bg-white text-zinc-900 px-2 py-1.5 text-sm"
                     />
                   </div>
                 </div>

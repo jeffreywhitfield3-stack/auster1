@@ -16,6 +16,9 @@ interface ChainTableProps {
   showWeeklies?: boolean;
   showMonthlies?: boolean;
   liquidOnly?: boolean;
+  multiSelectMode?: boolean;
+  selectedContracts?: Array<{ contract: MassiveOptionLeg; type: "call" | "put" }>;
+  onToggleSelection?: (contract: MassiveOptionLeg, type: "call" | "put") => void;
 }
 
 /**
@@ -57,6 +60,9 @@ export default function ChainTable({
   deltaMin = 0,
   deltaMax = 1,
   liquidOnly = false,
+  multiSelectMode = false,
+  selectedContracts = [],
+  onToggleSelection,
 }: ChainTableProps) {
   const [hoveredStrike, setHoveredStrike] = useState<number | null>(null);
   const [hoveredContract, setHoveredContract] = useState<{
@@ -89,6 +95,14 @@ export default function ChainTable({
   const callMap = new Map(filteredCalls.map((c) => [c.strike, c]));
   const putMap = new Map(filteredPuts.map((p) => [p.strike, p]));
 
+  // Helper to check if a contract is selected
+  const isSelected = (contract: MassiveOptionLeg | undefined, type: "call" | "put") => {
+    if (!contract) return false;
+    return selectedContracts.some(
+      (sel) => sel.contract.strike === contract.strike && sel.type === type
+    );
+  };
+
   return (
     <div className="w-full overflow-x-auto">
       {/* Filters */}
@@ -107,6 +121,11 @@ export default function ChainTable({
         <table className="w-full border-collapse text-sm">
           <thead>
             <tr className="border-b-2 border-zinc-300 bg-zinc-50">
+              {multiSelectMode && (
+                <th className="px-3 py-2 text-center text-xs font-semibold text-zinc-700">
+                  <Tip label="Select">Select contracts for strategy building</Tip>
+                </th>
+              )}
               <th className="px-3 py-2 text-right text-xs font-semibold text-zinc-700">
                 Strike
               </th>
@@ -177,6 +196,31 @@ export default function ChainTable({
                   onMouseEnter={() => setHoveredStrike(strike)}
                   onMouseLeave={() => setHoveredStrike(null)}
                 >
+                  {/* Multi-select checkboxes */}
+                  {multiSelectMode && (
+                    <td className="px-3 py-2">
+                      <div className="flex items-center justify-center gap-2">
+                        {call && (
+                          <input
+                            type="checkbox"
+                            checked={isSelected(call, "call")}
+                            onChange={() => onToggleSelection?.(call, "call")}
+                            className="h-4 w-4 cursor-pointer rounded border-green-300 text-green-600 focus:ring-green-500"
+                            title="Select Call"
+                          />
+                        )}
+                        {put && (
+                          <input
+                            type="checkbox"
+                            checked={isSelected(put, "put")}
+                            onChange={() => onToggleSelection?.(put, "put")}
+                            className="h-4 w-4 cursor-pointer rounded border-red-300 text-red-600 focus:ring-red-500"
+                            title="Select Put"
+                          />
+                        )}
+                      </div>
+                    </td>
+                  )}
                   {/* Call side */}
                   <td className="px-3 py-2 text-right font-mono text-zinc-900">
                     {(strike ?? 0).toFixed(2)}
@@ -343,7 +387,7 @@ export default function ChainTable({
                   </div>
                   {call ? (
                     <>
-                      <div className="mb-1 text-sm font-mono">
+                      <div className="mb-1 text-sm font-mono text-zinc-900">
                         ${call.ask?.toFixed(2) ?? "-"}
                       </div>
                       <div className="mb-1 flex items-center justify-between text-[11px] text-green-700">
@@ -372,7 +416,7 @@ export default function ChainTable({
                   </div>
                   {put ? (
                     <>
-                      <div className="mb-1 text-sm font-mono">
+                      <div className="mb-1 text-sm font-mono text-zinc-900">
                         ${put.ask?.toFixed(2) ?? "-"}
                       </div>
                       <div className="mb-1 flex items-center justify-between text-[11px] text-red-700">
@@ -398,9 +442,11 @@ export default function ChainTable({
 
       {/* Educational tip */}
       <div className="mt-4 rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-900">
-        <span className="font-semibold">Tip:</span> Click any contract to add
-        it to your Strategy Builder. ATM strikes (near ${(underlying ?? 0).toFixed(2)})
-        are highlighted in yellow.
+        <span className="font-semibold">Tip:</span>{" "}
+        {multiSelectMode
+          ? "Use checkboxes to select multiple contracts and build custom strategies."
+          : "Click any contract to add it to your Strategy Builder."}{" "}
+        ATM strikes (near ${(underlying ?? 0).toFixed(2)}) are highlighted in yellow.
       </div>
 
       {/* Spread warnings */}

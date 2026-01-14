@@ -10,14 +10,13 @@ export default function SupportPage() {
         <div className="mx-auto max-w-4xl px-6 py-24 sm:py-32">
           <div className="text-center">
             <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 shadow-sm">
-              💬 Support
+              Support
             </div>
             <h1 className="mt-6 text-4xl font-bold tracking-tight text-zinc-900 sm:text-5xl lg:text-6xl">
               We're here to help
             </h1>
             <p className="mt-6 text-xl leading-8 text-zinc-600">
-              If something isn't working, have a question, or want to request access, reach out anytime.
-              We respond to every message.
+              If something isn't working, you have a question, or want to request access, reach out anytime.
             </p>
           </div>
         </div>
@@ -30,7 +29,7 @@ export default function SupportPage() {
             {/* Technical Support */}
             <div className="rounded-2xl border border-zinc-200 bg-white p-8 shadow-lg transition-all hover:shadow-xl">
               <div className="inline-flex items-center gap-3 rounded-lg bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-900">
-                🛠️ Technical Support
+                Technical Support
               </div>
 
               <h2 className="mt-6 text-2xl font-bold text-zinc-900">
@@ -76,7 +75,7 @@ export default function SupportPage() {
             {/* Billing & Subscriptions */}
             <div className="rounded-2xl border border-zinc-200 bg-white p-8 shadow-lg transition-all hover:shadow-xl">
               <div className="inline-flex items-center gap-3 rounded-lg bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-900">
-                💳 Billing & Subscriptions
+                Billing & Subscriptions
               </div>
 
               <h2 className="mt-6 text-2xl font-bold text-zinc-900">
@@ -99,7 +98,7 @@ export default function SupportPage() {
                   <svg className="mt-1 h-5 w-5 flex-shrink-0 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <span className="text-sm text-zinc-700">Pro-rated refunds for unused time</span>
+                  <span className="text-sm text-zinc-700">Manage all billing through Stripe portal</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <svg className="mt-1 h-5 w-5 flex-shrink-0 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
@@ -110,12 +109,12 @@ export default function SupportPage() {
               </div>
 
               <div className="mt-8">
-                <Link
-                  href="/billing"
+                <a
+                  href="/api/billing/portal"
                   className="inline-flex items-center justify-center rounded-lg border-2 border-zinc-300 bg-white px-6 py-3 text-base font-semibold text-zinc-900 transition-all hover:border-zinc-400 hover:bg-zinc-50"
                 >
                   Manage subscription →
-                </Link>
+                </a>
               </div>
             </div>
           </div>
@@ -127,7 +126,7 @@ export default function SupportPage() {
         <div className="mx-auto max-w-4xl px-6">
           <div className="rounded-2xl border-2 border-zinc-300 bg-white p-8 shadow-xl sm:p-12">
             <div className="inline-flex items-center gap-3 rounded-lg bg-violet-50 px-4 py-2 text-sm font-semibold text-violet-900">
-              🎓 Free Access Program
+              Free Access Program
             </div>
 
             <h2 className="mt-6 text-3xl font-bold text-zinc-900">
@@ -135,8 +134,8 @@ export default function SupportPage() {
             </h2>
 
             <p className="mt-6 text-lg leading-8 text-zinc-600">
-              Money shouldn't be the reason you can't learn or build. If you're a student or money is a barrier right now,
-              you can request free usage. No complicated forms, no bureaucracy.
+              If you're a student or cost is a barrier, you can request free access.
+              No complicated forms, no bureaucracy.
             </p>
 
             <div className="mt-8 rounded-xl border border-zinc-200 bg-zinc-50 p-6">
@@ -176,11 +175,10 @@ export default function SupportPage() {
 
               <div className="mt-6 rounded-lg border border-violet-200 bg-violet-50 p-4">
                 <p className="text-sm font-semibold text-violet-900">
-                  💡 We personally review every request
+                  We personally review every request
                 </p>
                 <p className="mt-2 text-sm text-violet-800">
-                  I read and respond to these myself. If you're genuinely trying to learn or build something meaningful,
-                  you'll get access. Promise.
+                  If you're genuinely trying to learn or build something meaningful, you'll get access.
                 </p>
               </div>
             </div>

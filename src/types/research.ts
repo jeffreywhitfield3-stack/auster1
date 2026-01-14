@@ -50,7 +50,8 @@ export type ResearchObjectType =
   | 'market_analysis'
   | 'data_exploration'
   | 'methodology'
-  | 'replication';
+  | 'replication'
+  | 'quantitative_model';
 
 export type ResearchObjectStatus = 'draft' | 'published' | 'archived';
 
@@ -314,6 +315,7 @@ export interface PublishingDraft {
   topics: string[];
   lab_type: LabType;
   lab_workspace_id?: string;
+  lab_state?: any; // JSONB snapshot of lab state
 }
 
 // Discussion form state
@@ -444,7 +446,8 @@ export const RESEARCH_OBJECT_TYPES: Record<ResearchObjectType, string> = {
   market_analysis: 'Market Analysis',
   data_exploration: 'Data Exploration',
   methodology: 'Methodology',
-  replication: 'Replication Study'
+  replication: 'Replication Study',
+  quantitative_model: 'Quantitative Model',
 };
 
 export const DISCUSSION_TYPES: Record<DiscussionType, { label: string; description: string }> = {

@@ -68,6 +68,8 @@ export default function MacroClient() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<FREDResponse | null>(null);
+  const [savingWorkspace, setSavingWorkspace] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   async function fetchData(seriesId: string, start: string) {
     setLoading(true);
@@ -131,6 +133,42 @@ export default function MacroClient() {
     return value.toFixed(2);
   }
 
+  async function saveWorkspace() {
+    setSavingWorkspace(true);
+    try {
+      const workspaceState = {
+        selectedSeriesId: selectedSeries.id,
+        selectedSeriesName: selectedSeries.name,
+        data,
+        chartData,
+      };
+
+      const response = await fetch('/api/workspaces/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: `Macro: ${selectedSeries.name} - ${new Date().toLocaleDateString()}`,
+          description: `Macro research analysis for ${selectedSeries.description}`,
+          product: 'econ',
+          state: workspaceState,
+          is_public: false,
+        }),
+      });
+
+      if (response.ok) {
+        setSaveSuccess(true);
+        setTimeout(() => setSaveSuccess(false), 3000);
+      } else {
+        throw new Error('Failed to save workspace');
+      }
+    } catch (error) {
+      console.error('Error saving workspace:', error);
+      alert('Failed to save workspace');
+    } finally {
+      setSavingWorkspace(false);
+    }
+  }
+
   return (
     <main className="mx-auto min-h-screen max-w-7xl p-6">
       {/* Header */}
@@ -150,13 +188,24 @@ export default function MacroClient() {
               System-level economic behavior. Track GDP, inflation, unemployment, and monetary policy indicators.
             </p>
           </div>
-          <Link
-            href="/research/publish?from=econ-macro"
-            className="flex items-center gap-2 rounded-lg border-2 border-blue-600 bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:border-blue-700 hover:bg-blue-700"
-          >
-            <span>🏛</span>
-            <span>Publish to Research Stage</span>
-          </Link>
+          <div className="flex gap-2">
+            <button
+              onClick={saveWorkspace}
+              disabled={savingWorkspace}
+              className="flex items-center gap-2 rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-semibold text-zinc-900 hover:bg-zinc-50 disabled:opacity-50"
+            >
+              <span>💾</span>
+              <span>{savingWorkspace ? 'Saving...' : saveSuccess ? '✓ Saved!' : 'Save Analysis'}</span>
+            </button>
+
+            <Link
+              href="/research/publish?from=econ-macro"
+              className="flex items-center gap-2 rounded-lg border-2 border-blue-600 bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:border-blue-700 hover:bg-blue-700"
+            >
+              <span>🏛</span>
+              <span>Publish to Research Stage</span>
+            </Link>
+          </div>
         </div>
       </div>
 

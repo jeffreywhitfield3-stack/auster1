@@ -48,7 +48,7 @@ export default function ResearchStageClient() {
               Browse Research
             </Link>
             <Link
-              href="/research/about"
+              href="/support"
               className="inline-flex items-center gap-2 rounded-lg border-2 border-transparent bg-transparent px-6 py-3 font-semibold text-zinc-600 transition-all hover:text-zinc-900"
             >
               How it Works

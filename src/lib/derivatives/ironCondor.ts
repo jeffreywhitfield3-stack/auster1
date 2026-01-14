@@ -234,12 +234,23 @@ export function buildIronCondors(p: BuildParams): {
           const lowerBE = ps.strike - credit;
           const upperBE = cs.strike + credit;
 
+          // Validation: Filter out unrealistic strategies
+          // 1. Breakevens should not be too tight (< 1% from spot on either side)
+          const lowerBEpct = Math.abs((lowerBE - spot) / spot);
+          const upperBEpct = Math.abs((upperBE - spot) / spot);
+          if (lowerBEpct < 0.01 || upperBEpct < 0.01) continue;
+
+          // 2. Return on risk validation
+          const ror = credit / maxLoss;
+          if (ror > 1.0) continue; // Unrealistic - credit > max loss
+
           const pop =
             t && iv
               ? popBetweenBreakevens(spot, lowerBE, upperBE, iv, t)
               : null;
 
-          const ror = credit / maxLoss;
+          // 3. Skip strategies with 0% or near-0% POP (likely bad data or extreme OTM)
+          if (pop !== null && pop < 0.05) continue;
 
           condors.push({
             putLong: pl.strike,

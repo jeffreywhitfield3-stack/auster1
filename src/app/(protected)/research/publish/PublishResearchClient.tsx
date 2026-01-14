@@ -1,13 +1,20 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import type { PublishingDraft, ResearchObjectType } from "@/types/research";
+import ResearchImageUpload from "@/components/research/ResearchImageUpload";
 
 // Publishing flow: Transform lab work into public research objects
 
 export default function PublishResearchClient() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [step, setStep] = useState<"type" | "content" | "methods" | "review">("type");
+  const [publishing, setPublishing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   const [draft, setDraft] = useState<Partial<PublishingDraft>>({
     title: "",
     abstract: "",
@@ -21,6 +28,100 @@ export default function PublishResearchClient() {
     lab_type: "none",
     content: { sections: [], findings: [] },
   });
+
+  // Extract lab context from URL params
+  useEffect(() => {
+    const from = searchParams.get('from');
+    const workspaceId = searchParams.get('workspace');
+    const modelSlug = searchParams.get('model');
+
+    if (from) {
+      if (from === 'derivatives') {
+        setDraft(prev => ({
+          ...prev,
+          lab_type: 'derivatives',
+          object_type: 'market_analysis'
+        }));
+      } else if (from.startsWith('econ')) {
+        setDraft(prev => ({
+          ...prev,
+          lab_type: 'econ',
+          object_type: 'economic_research'
+        }));
+      } else if (from === 'models') {
+        setDraft(prev => ({
+          ...prev,
+          lab_type: 'none',
+          object_type: 'quantitative_model'
+        }));
+      }
+    }
+
+    if (workspaceId) {
+      setDraft(prev => ({
+        ...prev,
+        lab_workspace_id: workspaceId
+      }));
+    }
+
+    if (modelSlug) {
+      // Fetch model details
+      fetch(`/api/models/${modelSlug}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.model) {
+            setDraft(prev => ({
+              ...prev,
+              linked_model_slug: modelSlug,
+              lab_type: data.model.lab_scope === 'both' ? 'none' : data.model.lab_scope,
+              title: `Analysis using ${data.model.name}`,
+              data_sources: [`Model: ${data.model.name}`],
+            }));
+          }
+        })
+        .catch(err => console.error('Failed to fetch model:', err));
+    }
+  }, [searchParams]);
+
+  async function handlePublish() {
+    setPublishing(true);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/research/publish', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: draft.title,
+          abstract: draft.abstract,
+          content: draft.content || {},
+          object_type: draft.object_type,
+          methods: draft.methods,
+          assumptions: draft.assumptions,
+          data_sources: draft.data_sources || [],
+          statistical_techniques: draft.statistical_techniques || [],
+          lab_type: draft.lab_type || 'none',
+          lab_workspace_id: draft.lab_workspace_id,
+          lab_state: draft.lab_state,
+          tags: draft.tags || [],
+          topics: draft.topics || []
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to publish research');
+      }
+
+      const { research_object } = await response.json();
+
+      // Redirect to published research
+      router.push(`/research/${research_object.slug}`);
+    } catch (err: any) {
+      setError(err.message);
+      setPublishing(false);
+    }
+  }
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-zinc-50 to-white">
@@ -70,10 +171,17 @@ export default function PublishResearchClient() {
 
       {/* Form Content */}
       <div className="mx-auto max-w-4xl px-6 py-12">
+        {error && (
+          <div className="mb-6 rounded-lg border border-red-300 bg-red-50 p-4">
+            <p className="font-semibold text-red-900">Error</p>
+            <p className="text-sm text-red-700">{error}</p>
+          </div>
+        )}
+
         {step === "type" && <TypeStep draft={draft} setDraft={setDraft} onNext={() => setStep("content")} />}
         {step === "content" && <ContentStep draft={draft} setDraft={setDraft} onNext={() => setStep("methods")} onBack={() => setStep("type")} />}
         {step === "methods" && <MethodsStep draft={draft} setDraft={setDraft} onNext={() => setStep("review")} onBack={() => setStep("content")} />}
-        {step === "review" && <ReviewStep draft={draft} onBack={() => setStep("methods")} />}
+        {step === "review" && <ReviewStep draft={draft} onBack={() => setStep("methods")} onPublish={handlePublish} publishing={publishing} />}
       </div>
 
       {/* Guidelines Panel */}
@@ -210,7 +318,7 @@ function ContentStep({ draft, setDraft, onNext, onBack }: StepProps) {
             value={draft.title}
             onChange={(e) => setDraft({ ...draft, title: e.target.value })}
             placeholder="e.g., Long-Run Inequality Trends in the United States, 1980-2025"
-            className="w-full rounded-lg border border-zinc-300 px-4 py-3 text-zinc-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20"
+            className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-3 text-zinc-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20 placeholder:text-zinc-400"
           />
         </div>
 
@@ -224,21 +332,100 @@ function ContentStep({ draft, setDraft, onNext, onBack }: StepProps) {
             onChange={(e) => setDraft({ ...draft, abstract: e.target.value })}
             placeholder="2-4 sentences summarizing your research question, approach, and key findings..."
             rows={4}
-            className="w-full rounded-lg border border-zinc-300 px-4 py-3 text-zinc-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20"
+            className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-3 text-zinc-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20 placeholder:text-zinc-400"
           />
+        </div>
+
+        {/* Main Content */}
+        <div>
+          <label className="mb-2 block text-sm font-semibold text-zinc-900">
+            Main Content (optional)
+          </label>
+          <textarea
+            value={
+              draft.content?.sections?.[0]?.type === 'text'
+                ? (draft.content.sections[0].content || '')
+                : ''
+            }
+            onChange={(e) =>
+              setDraft({
+                ...draft,
+                content: {
+                  sections: [{ type: 'text', content: e.target.value }],
+                  findings: draft.content?.findings || [],
+                },
+              })
+            }
+            placeholder="Detailed analysis, findings, and discussion..."
+            rows={8}
+            className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-3 text-zinc-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20 placeholder:text-zinc-400"
+          />
+          <p className="mt-1 text-xs text-zinc-500">Provide the full content of your research analysis</p>
         </div>
 
         {/* Topics */}
         <div>
           <label className="mb-2 block text-sm font-semibold text-zinc-900">
-            Topics <span className="text-red-600">*</span>
+            Topics
           </label>
           <input
             type="text"
+            value={(draft.topics || []).join(', ')}
+            onChange={(e) => setDraft({ ...draft, topics: e.target.value.split(',').map(t => t.trim()).filter(Boolean) })}
             placeholder="e.g., Inequality, Income Distribution, Wealth (comma-separated)"
-            className="w-full rounded-lg border border-zinc-300 px-4 py-3 text-zinc-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20"
+            className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-3 text-zinc-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20 placeholder:text-zinc-400"
           />
           <p className="mt-1 text-xs text-zinc-500">Add 2-5 topics that describe your research</p>
+        </div>
+
+        {/* Image Uploads */}
+        <div>
+          <label className="mb-2 block text-sm font-semibold text-zinc-900">
+            Supporting Images (optional)
+          </label>
+          <ResearchImageUpload
+            images={
+              (draft.content?.sections || [])
+                .filter((s) => s.type === 'image')
+                .map((s) => ({
+                  path: s.content || '',
+                  publicUrl: s.content || '',
+                  caption: s.caption || '',
+                }))
+            }
+            onImageAdded={(image) => {
+              const currentSections = draft.content?.sections || [];
+              const textSections = currentSections.filter((s) => s.type !== 'image');
+              const imageSections = currentSections.filter((s) => s.type === 'image');
+
+              setDraft({
+                ...draft,
+                content: {
+                  sections: [
+                    ...textSections,
+                    ...imageSections,
+                    { type: 'image', content: image.publicUrl, caption: image.caption },
+                  ],
+                  findings: draft.content?.findings || [],
+                },
+              });
+            }}
+            onImageRemoved={(publicUrl) => {
+              const currentSections = draft.content?.sections || [];
+              setDraft({
+                ...draft,
+                content: {
+                  sections: currentSections.filter(
+                    (s) => s.type !== 'image' || s.content !== publicUrl
+                  ),
+                  findings: draft.content?.findings || [],
+                },
+              });
+            }}
+          />
+          <p className="mt-1 text-xs text-zinc-500">
+            Upload charts, graphs, or visualizations to enhance your research
+          </p>
         </div>
       </div>
 
@@ -280,7 +467,7 @@ function MethodsStep({ draft, setDraft, onNext, onBack }: StepProps) {
             onChange={(e) => setDraft({ ...draft, methods: e.target.value })}
             placeholder="Describe your analytical approach, statistical techniques, and calculations..."
             rows={6}
-            className="w-full rounded-lg border border-zinc-300 px-4 py-3 text-zinc-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20"
+            className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-3 text-zinc-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20 placeholder:text-zinc-400"
           />
         </div>
 
@@ -294,7 +481,7 @@ function MethodsStep({ draft, setDraft, onNext, onBack }: StepProps) {
             onChange={(e) => setDraft({ ...draft, assumptions: e.target.value })}
             placeholder="State explicit assumptions underlying your analysis..."
             rows={4}
-            className="w-full rounded-lg border border-zinc-300 px-4 py-3 text-zinc-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20"
+            className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-3 text-zinc-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20 placeholder:text-zinc-400"
           />
         </div>
 
@@ -306,7 +493,7 @@ function MethodsStep({ draft, setDraft, onNext, onBack }: StepProps) {
           <input
             type="text"
             placeholder="e.g., BLS CPS, FRED, World Inequality Database (comma-separated)"
-            className="w-full rounded-lg border border-zinc-300 px-4 py-3 text-zinc-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20"
+            className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-3 text-zinc-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20 placeholder:text-zinc-400"
           />
         </div>
       </div>
@@ -330,7 +517,12 @@ function MethodsStep({ draft, setDraft, onNext, onBack }: StepProps) {
   );
 }
 
-function ReviewStep({ draft, onBack }: Pick<StepProps, "draft" | "onBack">) {
+function ReviewStep({
+  draft,
+  onBack,
+  onPublish,
+  publishing
+}: Pick<StepProps, "draft" | "onBack"> & { onPublish: () => void; publishing: boolean }) {
   return (
     <div className="space-y-6">
       <div>
@@ -381,12 +573,17 @@ function ReviewStep({ draft, onBack }: Pick<StepProps, "draft" | "onBack">) {
       <div className="flex justify-between pt-4">
         <button
           onClick={onBack}
-          className="rounded-lg border-2 border-zinc-300 bg-white px-6 py-3 font-semibold text-zinc-900 transition-all hover:border-zinc-400"
+          disabled={publishing}
+          className="rounded-lg border-2 border-zinc-300 bg-white px-6 py-3 font-semibold text-zinc-900 transition-all hover:border-zinc-400 disabled:opacity-50"
         >
           ← Back to Edit
         </button>
-        <button className="rounded-lg bg-blue-600 px-8 py-3 font-semibold text-white shadow-sm transition-all hover:bg-blue-700">
-          Publish to Research Stage →
+        <button
+          onClick={onPublish}
+          disabled={publishing}
+          className="rounded-lg bg-blue-600 px-8 py-3 font-semibold text-white shadow-sm transition-all hover:bg-blue-700 disabled:opacity-50"
+        >
+          {publishing ? 'Publishing...' : 'Publish to Research Commons →'}
         </button>
       </div>
     </div>

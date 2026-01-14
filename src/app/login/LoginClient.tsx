@@ -4,7 +4,7 @@
 import { useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabase-browser";
-import { ArrowLeft, Mail, Lock, TrendingUp, BarChart3 } from "lucide-react";
+import { ArrowLeft, Mail, Lock, TrendingUp, BarChart3, User } from "lucide-react";
 
 export default function LoginClient() {
   const router = useRouter();
@@ -21,6 +21,8 @@ export default function LoginClient() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [status, setStatus] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -62,6 +64,8 @@ export default function LoginClient() {
       options: {
         emailRedirectTo: `${window.location.origin}/login?next=${encodeURIComponent(nextUrl)}`,
         data: {
+          first_name: firstName.trim(),
+          last_name: lastName.trim(),
           opt_in_econ_brief: optInEconBrief,
           opt_in_options_brief: optInOptionsBrief,
         },
@@ -147,6 +151,49 @@ export default function LoginClient() {
           {!showForgotPassword ? (
             <>
               <form className="space-y-4" onSubmit={isSignup ? onSignup : onSubmit}>
+                {/* Name Fields (only show during signup) */}
+                {isSignup && (
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* First Name Input */}
+                    <div>
+                      <label className="block text-sm font-medium text-zinc-700 mb-2">
+                        First Name
+                      </label>
+                      <div className="relative">
+                        <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400" />
+                        <input
+                          className="w-full rounded-lg border border-zinc-300 bg-white text-zinc-900 pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-zinc-400"
+                          placeholder="John"
+                          type="text"
+                          value={firstName}
+                          onChange={(e) => setFirstName(e.target.value)}
+                          autoComplete="given-name"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    {/* Last Name Input */}
+                    <div>
+                      <label className="block text-sm font-medium text-zinc-700 mb-2">
+                        Last Name
+                      </label>
+                      <div className="relative">
+                        <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400" />
+                        <input
+                          className="w-full rounded-lg border border-zinc-300 bg-white text-zinc-900 pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-zinc-400"
+                          placeholder="Doe"
+                          type="text"
+                          value={lastName}
+                          onChange={(e) => setLastName(e.target.value)}
+                          autoComplete="family-name"
+                          required
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Email Input */}
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 mb-2">
@@ -155,7 +202,7 @@ export default function LoginClient() {
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400" />
                     <input
-                      className="w-full rounded-lg border border-zinc-300 bg-white pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full rounded-lg border border-zinc-300 bg-white text-zinc-900 pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-zinc-400"
                       placeholder="you@example.com"
                       type="email"
                       value={email}
@@ -174,7 +221,7 @@ export default function LoginClient() {
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400" />
                     <input
-                      className="w-full rounded-lg border border-zinc-300 bg-white pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full rounded-lg border border-zinc-300 bg-white text-zinc-900 pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-zinc-400"
                       placeholder={isSignup ? "Choose a secure password" : "Enter your password"}
                       type="password"
                       value={password}
@@ -290,7 +337,7 @@ export default function LoginClient() {
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400" />
                     <input
-                      className="w-full rounded-lg border border-zinc-300 bg-white pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full rounded-lg border border-zinc-300 bg-white text-zinc-900 pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-zinc-400"
                       placeholder="you@example.com"
                       type="email"
                       value={email}

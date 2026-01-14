@@ -215,41 +215,65 @@ export async function massiveChain(symbol: string, expiration: string): Promise<
 
   // Try Polygon API
   try {
+    // CRITICAL: Polygon Options Starter does NOT include underlying_asset.price in snapshot endpoint
+    // We must fetch the underlying price separately
+    console.log(`[massiveChain] Step 1: Fetching underlying price for ${symbol}`);
+    const quoteData = await massiveQuote(symbol);
+    const underlyingPrice = quoteData.price || NaN;
+    console.log(`[massiveChain] Underlying price: ${underlyingPrice}`);
+
     // Polygon-style: /v3/snapshot/options/{underlying}?limit=250
     type SnapshotResp = {
-      results?: {
-        underlying_asset?: { price?: number };
-        last_updated?: number;
-        options?: Array<{
-          details?: { strike_price?: number; expiration_date?: string; contract_type?: "call" | "put" };
-          last_quote?: { bid?: number; ask?: number };
-          day?: { volume?: number };
-          open_interest?: number;
-          implied_volatility?: number;
-          greeks?: { delta?: number; theta?: number };
-        }>;
-      };
+      results?: Array<{
+        details?: { strike_price?: number; expiration_date?: string; contract_type?: "call" | "put" };
+        last_quote?: { bid?: number; ask?: number };
+        day?: { volume?: number; last_updated?: number };
+        open_interest?: number;
+        implied_volatility?: number;
+        greeks?: { delta?: number; theta?: number };
+        underlying_asset?: { ticker?: string };
+      }>;
+      status?: string;
     };
 
+    // Polygon Options Starter: Use snapshot with expiration filter
+    console.log(`[massiveChain] Step 2: Fetching options chain for ${symbol} exp ${expiration}`);
     const j = await massiveFetch<SnapshotResp>(`/v3/snapshot/options/${encodeURIComponent(symbol)}`, {
-      qs: { limit: 250 },
+      qs: {
+        limit: 250,
+        'expiration_date': expiration, // Filter by expiration
+      },
     });
 
-    const underlying = Number(j?.results?.underlying_asset?.price ?? NaN);
-    const asOf =
-      typeof j?.results?.last_updated === "number"
-        ? new Date(j.results.last_updated).toISOString()
-        : null;
+    console.log(`[massiveChain] Polygon response:`, {
+      status: j?.status,
+      optionsCount: j?.results?.length || 0,
+    });
+
+    const underlying = underlyingPrice;
+
+    // Get timestamp from quote data (more reliable than options data)
+    const asOf = quoteData.asOf || null;
 
     const calls: MassiveOptionLeg[] = [];
     const puts: MassiveOptionLeg[] = [];
 
-    for (const opt of j?.results?.options ?? []) {
+    let filteredCount = 0;
+    let invalidStrikeCount = 0;
+
+    // Note: results is now an array directly, not nested under results.options
+    for (const opt of j?.results ?? []) {
       const exp = opt?.details?.expiration_date ? String(opt.details.expiration_date) : "";
-      if (exp !== expiration) continue;
+      if (exp !== expiration) {
+        filteredCount++;
+        continue;
+      }
 
       const strike = Number(opt?.details?.strike_price ?? NaN);
-      if (!Number.isFinite(strike)) continue;
+      if (!Number.isFinite(strike)) {
+        invalidStrikeCount++;
+        continue;
+      }
 
       const leg: MassiveOptionLeg = {
         strike,
@@ -265,6 +289,14 @@ export async function massiveChain(symbol: string, expiration: string): Promise<
       if (opt?.details?.contract_type === "call") calls.push(leg);
       if (opt?.details?.contract_type === "put") puts.push(leg);
     }
+
+    console.log(`[massiveChain] Processing results:`, {
+      totalOptions: j?.results?.length || 0,
+      filteredByExpiration: filteredCount,
+      invalidStrikes: invalidStrikeCount,
+      callsFound: calls.length,
+      putsFound: puts.length,
+    });
 
     // Sort by strike
     calls.sort((a, b) => a.strike - b.strike);

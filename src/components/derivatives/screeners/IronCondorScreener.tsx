@@ -243,6 +243,16 @@ export default function IronCondorScreener({
 
   return (
     <div className="space-y-6">
+      {/* Disclaimer */}
+      <div className="rounded-lg border-2 border-amber-300 bg-amber-50 p-4">
+        <div className="flex items-start gap-3">
+          <span className="text-xl">⚠️</span>
+          <div className="text-sm text-amber-900">
+            <strong>Not Financial Advice:</strong> These are educational tools only. Probability calculations are estimates based on historical volatility and may not reflect actual outcomes. Always verify data, understand the risks, and consult a licensed advisor before trading.
+          </div>
+        </div>
+      </div>
+
       {/* Header */}
       <div className="rounded-2xl border border-zinc-200 bg-white p-5">
         <div className="flex flex-wrap items-end justify-between gap-3">

@@ -11,6 +11,19 @@ type NotificationPreferences = {
   market_events: boolean;
 };
 
+type ResearchNotificationSettings = {
+  notify_on_new_follower: boolean;
+  notify_on_discussion: boolean;
+  notify_on_reply: boolean;
+  notify_on_citation: boolean;
+  notify_on_publish_follower: boolean;
+  email_on_new_follower: boolean;
+  email_on_discussion: boolean;
+  email_on_reply: boolean;
+  email_on_citation: boolean;
+  email_on_publish_follower: boolean;
+};
+
 export default function NotificationsClient() {
   const [preferences, setPreferences] = useState<NotificationPreferences>({
     weekly_briefs: true,

@@ -1,27 +1,21 @@
 // src/middleware.ts
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-import { updateSession } from "@/lib/supabase/middleware";
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
-export async function middleware(request: NextRequest) {
-  // Update Supabase session (refresh tokens, etc.)
-  const response = await updateSession(request);
+export function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
 
-  // Add the current pathname to headers for the protected layout to use
-  response.headers.set("x-pathname", request.nextUrl.pathname);
+  // Redirect /@username to /[username]
+  if (pathname.startsWith('/@')) {
+    const username = pathname.slice(2); // Remove /@
+    const url = request.nextUrl.clone();
+    url.pathname = `/${username}`;
+    return NextResponse.rewrite(url);
+  }
 
-  return response;
+  return NextResponse.next();
 }
 
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder files
-     */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
-  ],
+  matcher: '/@:username*',
 };

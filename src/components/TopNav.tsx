@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase-browser";
+import NotificationDropdown from "./social/NotificationDropdown";
 
 const ADMIN_EMAIL = "jeffreywhitfield3@gmail.com";
 
@@ -158,6 +159,9 @@ export default function TopNav() {
         <div className="flex items-center gap-2">
           {authed ? (
             <>
+              {/* Notification Bell */}
+              <NotificationDropdown />
+
               {isAdmin && (
                 <Link
                   href="/app/admin/blog"
@@ -172,6 +176,13 @@ export default function TopNav() {
                 className="hidden rounded-lg border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50 sm:block"
               >
                 Projects
+              </Link>
+
+              <Link
+                href="/settings"
+                className="hidden rounded-lg border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50 sm:block"
+              >
+                Settings
               </Link>
 
               <button

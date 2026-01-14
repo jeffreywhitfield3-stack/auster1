@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import PaywallBanner from "@/components/econ/PaywallBanner";
+import DisclaimerBanner from "@/components/derivatives/shared/DisclaimerBanner";
 import { peekUsage, incrementUsage } from "@/lib/usage-client";
 
 // Tab Components
@@ -13,10 +14,11 @@ import EventsTab from "@/components/derivatives/events/EventsTab";
 import MyPositions from "@/components/derivatives/positions/MyPositions";
 import BuilderTray from "@/components/derivatives/builder/BuilderTray";
 import Watchlist from "@/components/derivatives/shared/Watchlist";
+import ModelsTab from "@/components/models/ModelsTab";
 
 type EntMe = { is_paid: boolean; plan: string };
 
-type Tab = "chain" | "builder" | "screeners" | "events" | "positions" | "watchlist";
+type Tab = "chain" | "builder" | "screeners" | "events" | "positions" | "watchlist" | "models";
 
 type Quote = { symbol: string; price: number | null; asOf?: string | null };
 type ExpResp = { symbol: string; expirations: string[] };
@@ -103,6 +105,10 @@ export default function DerivativesClient() {
   // Builder Tray State
   const [isTrayExpanded, setIsTrayExpanded] = useState(false);
 
+  // Workspace Save State
+  const [savingWorkspace, setSavingWorkspace] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+
   // Load quote and expirations
   async function loadQuoteAndExpirations() {
     if (!symbol) return;
@@ -141,13 +147,51 @@ export default function DerivativesClient() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ent, symbol]);
 
+  // Save workspace function
+  async function saveWorkspace() {
+    setSavingWorkspace(true);
+    try {
+      const workspaceState = {
+        symbol,
+        selectedExpiration,
+        activeTab,
+        quote,
+      };
+
+      const response = await fetch('/api/workspaces/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: `${symbol} Analysis - ${new Date().toLocaleDateString()}`,
+          description: `Derivatives analysis for ${symbol}`,
+          product: 'derivatives',
+          state: workspaceState,
+          is_public: false,
+        }),
+      });
+
+      if (response.ok) {
+        setSaveSuccess(true);
+        setTimeout(() => setSaveSuccess(false), 3000);
+      } else {
+        throw new Error('Failed to save workspace');
+      }
+    } catch (error) {
+      console.error('Error saving workspace:', error);
+      alert('Failed to save workspace');
+    } finally {
+      setSavingWorkspace(false);
+    }
+  }
+
   const tabs = [
-    { id: "chain" as const, name: "Chain", icon: "📊", description: "Options chain with IV smile" },
-    { id: "builder" as const, name: "Builder", icon: "🏗️", description: "Multi-leg strategy builder" },
-    { id: "screeners" as const, name: "Screeners", icon: "🔍", description: "Find high-probability setups" },
-    { id: "events" as const, name: "Events", icon: "📅", description: "Earnings & economic events" },
-    { id: "positions" as const, name: "Positions", icon: "💼", description: "Track your trades" },
-    { id: "watchlist" as const, name: "Watchlist", icon: "⭐", description: "Track symbols with alerts" },
+    { id: "chain" as const, name: "Chain", icon: "📊", description: "View options chain" },
+    { id: "builder" as const, name: "Builder", icon: "🏗️", description: "Build multi-leg strategies" },
+    { id: "screeners" as const, name: "Screeners", icon: "🔍", description: "Find opportunities" },
+    { id: "events" as const, name: "Events", icon: "📅", description: "Track earnings" },
+    { id: "positions" as const, name: "Positions", icon: "💼", description: "Monitor trades" },
+    { id: "watchlist" as const, name: "Watchlist", icon: "⭐", description: "Track symbols" },
+    { id: "models" as const, name: "Models", icon: "⚡", description: "Run models" },
   ];
 
   const currentPrice = quote?.price ?? 0;
@@ -159,7 +203,7 @@ export default function DerivativesClient() {
         <div>
           <h1 className="text-3xl font-bold text-zinc-900">Derivatives Lab</h1>
           <p className="mt-1 text-sm text-zinc-600">
-            Research-grade options tools: clearer data, smarter analysis, better decisions.
+            Options analysis that actually works.
           </p>
           <p className="mt-2 text-xs text-zinc-500">{usageLine}</p>
         </div>
@@ -168,7 +212,7 @@ export default function DerivativesClient() {
           <input
             value={symbol}
             onChange={(e) => setSymbol(e.target.value.toUpperCase())}
-            className="h-11 w-32 rounded-lg border border-zinc-200 bg-white px-3 text-sm font-semibold outline-none focus:border-zinc-400 focus:ring-2 focus:ring-zinc-200"
+            className="h-11 w-32 rounded-lg border border-zinc-200 bg-white px-3 text-sm font-semibold text-zinc-900 outline-none focus:border-zinc-400 focus:ring-2 focus:ring-zinc-200"
             placeholder="SPY"
           />
           <button
@@ -179,12 +223,21 @@ export default function DerivativesClient() {
             {busy ? "Loading..." : "Refresh"}
           </button>
 
+          <button
+            onClick={saveWorkspace}
+            disabled={savingWorkspace}
+            className="flex h-11 items-center gap-2 rounded-lg border border-zinc-300 bg-white px-4 text-sm font-semibold text-zinc-900 hover:bg-zinc-50 disabled:opacity-50"
+          >
+            <span>💾</span>
+            <span>{savingWorkspace ? 'Saving...' : saveSuccess ? '✓ Saved!' : 'Save'}</span>
+          </button>
+
           <Link
             href="/research/publish?from=derivatives"
             className="flex h-11 items-center gap-2 rounded-lg border-2 border-blue-600 bg-blue-600 px-4 text-sm font-semibold text-white hover:border-blue-700 hover:bg-blue-700"
           >
             <span>📊</span>
-            <span>Publish to Research Stage</span>
+            <span>Publish</span>
           </Link>
 
           {quote?.price && (
@@ -203,6 +256,11 @@ export default function DerivativesClient() {
         label="Free limit reached"
         message="This action uses a credit. Subscribe for unlimited Derivatives access."
       />
+
+      {/* Disclaimer */}
+      <div className="mb-6">
+        <DisclaimerBanner />
+      </div>
 
       {err && (
         <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm">
@@ -229,7 +287,9 @@ export default function DerivativesClient() {
                 <div className="font-semibold">{tab.name}</div>
                 <div
                   className={`text-xs ${
-                    activeTab === tab.id ? "text-zinc-300" : "text-zinc-600 group-hover:text-zinc-700"
+                    activeTab === tab.id
+                      ? "text-zinc-300"
+                      : "text-zinc-600 group-hover:text-zinc-700"
                   }`}
                 >
                   {tab.description}
@@ -285,6 +345,8 @@ export default function DerivativesClient() {
             }}
           />
         )}
+
+        {activeTab === "models" && <ModelsTab lab="derivatives" />}
       </div>
 
       {/* Builder Tray (shows on Builder tab) */}
@@ -298,28 +360,99 @@ export default function DerivativesClient() {
         />
       )}
 
-      {/* Quick Tips Footer */}
-      <div className="mt-8 rounded-xl border border-blue-200 bg-blue-50 p-5">
-        <div className="text-sm font-semibold text-blue-900">Quick Navigation</div>
-        <div className="mt-2 grid gap-2 text-sm text-blue-800 sm:grid-cols-2 lg:grid-cols-3">
-          <div>
-            <strong>Chain:</strong> View options chain, IV smile, select strikes
-          </div>
-          <div>
-            <strong>Builder:</strong> Create multi-leg strategies with P&L analysis
-          </div>
-          <div>
-            <strong>Screeners:</strong> Find iron condors, spreads, unusual activity
-          </div>
-          <div>
-            <strong>Events:</strong> Track earnings and macro events
-          </div>
-          <div>
-            <strong>Positions:</strong> Monitor and manage your trades
-          </div>
-          <div>
-            <strong>Watchlist:</strong> Track symbols with custom alerts
-          </div>
+      {/* Quick Navigation Footer */}
+      <div className="mt-8 rounded-xl border border-zinc-200 bg-white p-5">
+        <div className="mb-3 text-sm font-semibold text-zinc-900">Quick Navigation</div>
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          <button
+            onClick={() => setActiveTab("chain")}
+            className={`flex items-start gap-3 rounded-lg border p-3 text-left transition-all ${
+              activeTab === "chain"
+                ? "border-blue-500 bg-blue-50"
+                : "border-zinc-200 bg-zinc-50 hover:border-zinc-300 hover:bg-zinc-100"
+            }`}
+          >
+            <span className="text-xl">📊</span>
+            <div>
+              <div className="font-semibold text-zinc-900">Chain</div>
+              <div className="text-xs text-zinc-600">View chain and IV</div>
+            </div>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("builder")}
+            className={`flex items-start gap-3 rounded-lg border p-3 text-left transition-all ${
+              activeTab === "builder"
+                ? "border-blue-500 bg-blue-50"
+                : "border-zinc-200 bg-zinc-50 hover:border-zinc-300 hover:bg-zinc-100"
+            }`}
+          >
+            <span className="text-xl">🏗️</span>
+            <div>
+              <div className="font-semibold text-zinc-900">Builder</div>
+              <div className="text-xs text-zinc-600">Build strategies</div>
+            </div>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("screeners")}
+            className={`flex items-start gap-3 rounded-lg border p-3 text-left transition-all ${
+              activeTab === "screeners"
+                ? "border-blue-500 bg-blue-50"
+                : "border-zinc-200 bg-zinc-50 hover:border-zinc-300 hover:bg-zinc-100"
+            }`}
+          >
+            <span className="text-xl">🔍</span>
+            <div>
+              <div className="font-semibold text-zinc-900">Screeners</div>
+              <div className="text-xs text-zinc-600">Find opportunities</div>
+            </div>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("events")}
+            className={`flex items-start gap-3 rounded-lg border p-3 text-left transition-all ${
+              activeTab === "events"
+                ? "border-blue-500 bg-blue-50"
+                : "border-zinc-200 bg-zinc-50 hover:border-zinc-300 hover:bg-zinc-100"
+            }`}
+          >
+            <span className="text-xl">📅</span>
+            <div>
+              <div className="font-semibold text-zinc-900">Events</div>
+              <div className="text-xs text-zinc-600">Track earnings</div>
+            </div>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("positions")}
+            className={`flex items-start gap-3 rounded-lg border p-3 text-left transition-all ${
+              activeTab === "positions"
+                ? "border-blue-500 bg-blue-50"
+                : "border-zinc-200 bg-zinc-50 hover:border-zinc-300 hover:bg-zinc-100"
+            }`}
+          >
+            <span className="text-xl">💼</span>
+            <div>
+              <div className="font-semibold text-zinc-900">Positions</div>
+              <div className="text-xs text-zinc-600">Monitor trades</div>
+            </div>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("watchlist")}
+            className={`flex items-start gap-3 rounded-lg border p-3 text-left transition-all ${
+              activeTab === "watchlist"
+                ? "border-blue-500 bg-blue-50"
+                : "border-zinc-200 bg-zinc-50 hover:border-zinc-300 hover:bg-zinc-100"
+            }`}
+          >
+            <span className="text-xl">⭐</span>
+            <div>
+              <div className="font-semibold text-zinc-900">Watchlist</div>
+              <div className="text-xs text-zinc-600">Track symbols</div>
+            </div>
+          </button>
         </div>
       </div>
     </main>

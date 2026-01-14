@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { massiveQuote } from "@/lib/derivatives/massive";
+import { getDefaultGateway } from "@/lib/market-data";
 import { supabaseServer } from "@/lib/supabase/server";
 import { getClientIp, hashIp } from "@/lib/ip";
 
@@ -40,7 +40,9 @@ export async function GET(req: Request) {
       );
     }
 
-    const q = await massiveQuote(symbol);
+    // Use gateway instead of direct massiveQuote call
+    const gateway = getDefaultGateway();
+    const q = await gateway.getQuote(symbol);
     return NextResponse.json(q);
   } catch (e: any) {
     return NextResponse.json({ error: "quote_failed", detail: String(e?.message || e) }, { status: 500 });

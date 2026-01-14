@@ -10,6 +10,7 @@ import VolTermStructure from "./VolTermStructure";
 import RiskGraph from "../shared/RiskGraph";
 import BacktestEngine from "../shared/BacktestEngine";
 import HedgeSuggestions from "../shared/HedgeSuggestions";
+import StrategyBuilderPanel from "./StrategyBuilderPanel";
 import type { MassiveChainSnapshot, MassiveOptionLeg } from "@/lib/derivatives/massive";
 
 interface ChainTabProps {
@@ -33,7 +34,7 @@ export default function ChainTab({ symbol, onContractSelect }: ChainTabProps) {
   // Filters
   const [deltaMin, setDeltaMin] = useState(0.25);
   const [deltaMax, setDeltaMax] = useState(0.75);
-  const [liquidOnly, setLiquidOnly] = useState(true);
+  const [liquidOnly, setLiquidOnly] = useState(false);
   const [showWeeklies, setShowWeeklies] = useState(true);
   const [showMonthlies, setShowMonthlies] = useState(true);
 
@@ -45,6 +46,27 @@ export default function ChainTab({ symbol, onContractSelect }: ChainTabProps) {
     contract: MassiveOptionLeg;
     type: "call" | "put";
   } | null>(null);
+
+  // Multi-select strategy builder state
+  const [multiSelectMode, setMultiSelectMode] = useState(false);
+  const [selectedContracts, setSelectedContracts] = useState<Array<{
+    contract: MassiveOptionLeg;
+    type: "call" | "put";
+  }>>([]);
+
+  const toggleContractSelection = (contract: MassiveOptionLeg, type: "call" | "put") => {
+    setSelectedContracts(prev => {
+      const exists = prev.some(
+        s => s.contract.strike === contract.strike && s.type === type
+      );
+      if (exists) {
+        return prev.filter(
+          s => !(s.contract.strike === contract.strike && s.type === type)
+        );
+      }
+      return [...prev, { contract, type }];
+    });
+  };
 
   // Fetch expirations when symbol changes
   useEffect(() => {
@@ -139,30 +161,100 @@ export default function ChainTab({ symbol, onContractSelect }: ChainTabProps) {
     );
   }
 
-  return (
-    <div className="space-y-6">
-      {/* Quote Header */}
-      {quoteData && (
-        <QuoteHeader
-          symbol={symbol}
-          price={quoteData.price}
-          change={quoteData.change}
-          changePercent={quoteData.changePercent}
-          ivRank={undefined} // TODO: Fetch IV rank from API
-          nextEarnings={null} // TODO: Fetch earnings from API
-          daysToEarnings={null}
-        />
-      )}
+  // Analytics tab state
+  const [analyticsTab, setAnalyticsTab] = useState<"iv-smile" | "oi-heatmap" | "vol-term">("iv-smile");
 
-      {/* Expiration Picker */}
-      <ExpirationPicker
-        expirations={expirations}
-        selected={selectedExpiration}
-        onSelect={setSelectedExpiration}
-        autoSelectDTE={35}
-        showWeeklies={showWeeklies}
-        showMonthlies={showMonthlies}
-      />
+  return (
+    <div className="space-y-4">
+      {/* Top Row: Quote + Expiration + Filters */}
+      <div className="grid gap-4 lg:grid-cols-[1fr,auto]">
+        {/* Left: Quote & Expiration */}
+        <div className="space-y-4">
+          {quoteData && (
+            <QuoteHeader
+              symbol={symbol}
+              price={quoteData.price}
+              change={quoteData.change}
+              changePercent={quoteData.changePercent}
+              ivRank={undefined}
+              nextEarnings={null}
+              daysToEarnings={null}
+            />
+          )}
+
+          <ExpirationPicker
+            expirations={expirations}
+            selected={selectedExpiration}
+            onSelect={setSelectedExpiration}
+            autoSelectDTE={35}
+            showWeeklies={showWeeklies}
+            showMonthlies={showMonthlies}
+          />
+        </div>
+
+        {/* Right: Filters */}
+        <div className="rounded-lg border border-zinc-200 bg-white p-4 lg:w-80">
+          <h3 className="mb-3 text-sm font-semibold text-zinc-900">Filters</h3>
+          <div className="space-y-3">
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={multiSelectMode}
+                onChange={(e) => {
+                  setMultiSelectMode(e.target.checked);
+                  if (!e.target.checked) {
+                    setSelectedContracts([]);
+                  }
+                }}
+                className="h-4 w-4 rounded border-zinc-300 text-blue-600 focus:ring-blue-500"
+              />
+              <span className="font-semibold text-zinc-900">Strategy Builder Mode</span>
+            </label>
+
+            <label className="flex items-center gap-2 text-sm text-zinc-900">
+              <input
+                type="checkbox"
+                checked={liquidOnly}
+                onChange={(e) => setLiquidOnly(e.target.checked)}
+                className="h-4 w-4 rounded border-zinc-300 text-blue-600 focus:ring-blue-500"
+              />
+              <span>Liquid only</span>
+            </label>
+
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-zinc-700">Delta range</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.05"
+                  value={deltaMin}
+                  onChange={(e) => setDeltaMin(parseFloat(e.target.value))}
+                  className="flex-1"
+                />
+                <span className="w-10 text-xs font-mono text-zinc-600">
+                  {deltaMin.toFixed(2)}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.05"
+                  value={deltaMax}
+                  onChange={(e) => setDeltaMax(parseFloat(e.target.value))}
+                  className="flex-1"
+                />
+                <span className="w-10 text-xs font-mono text-zinc-600">
+                  {deltaMax.toFixed(2)}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Loading State */}
       {loading && (
@@ -185,52 +277,7 @@ export default function ChainTab({ symbol, onContractSelect }: ChainTabProps) {
       {/* Chain Data */}
       {chainData && !loading && (
         <>
-          {/* Filters */}
-          <div className="rounded-lg border border-zinc-200 bg-white p-4">
-            <h3 className="mb-3 text-sm font-semibold text-zinc-900">Filters</h3>
-            <div className="flex flex-wrap items-center gap-4">
-              <label className="flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={liquidOnly}
-                  onChange={(e) => setLiquidOnly(e.target.checked)}
-                  className="h-4 w-4 rounded border-zinc-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span>Liquid only</span>
-              </label>
-
-              <div className="flex items-center gap-2">
-                <label className="text-sm text-zinc-700">Delta range:</label>
-                <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.05"
-                  value={deltaMin}
-                  onChange={(e) => setDeltaMin(parseFloat(e.target.value))}
-                  className="w-24"
-                />
-                <span className="text-sm font-mono text-zinc-600">
-                  {deltaMin.toFixed(2)}
-                </span>
-                <span className="text-zinc-400">to</span>
-                <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.05"
-                  value={deltaMax}
-                  onChange={(e) => setDeltaMax(parseFloat(e.target.value))}
-                  className="w-24"
-                />
-                <span className="text-sm font-mono text-zinc-600">
-                  {deltaMax.toFixed(2)}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
+          {/* Selected Contract Actions */}
           {selectedContract && (
             <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
               <div className="mb-3 flex items-center justify-between">
@@ -272,36 +319,98 @@ export default function ChainTab({ symbol, onContractSelect }: ChainTabProps) {
             </div>
           )}
 
-          {/* Chain Table */}
+          {/* Strategy Builder Panel (when multi-select mode) */}
+          {multiSelectMode && (
+            <StrategyBuilderPanel
+              selectedContracts={selectedContracts}
+              underlying={chainData.underlying}
+              onClearAll={() => setSelectedContracts([])}
+              onRemove={(contract, type) => toggleContractSelection(contract, type)}
+            />
+          )}
+
+          {/* Chain Table - Full Width */}
           <ChainTable
             calls={chainData.calls}
             puts={chainData.puts}
             underlying={chainData.underlying}
             onContractClick={(contract, type) => {
-              setSelectedContract({ contract, type });
-              onContractSelect?.(contract, type);
+              if (multiSelectMode) {
+                toggleContractSelection(contract, type);
+              } else {
+                setSelectedContract({ contract, type });
+                onContractSelect?.(contract, type);
+              }
             }}
             deltaMin={deltaMin}
             deltaMax={deltaMax}
             liquidOnly={liquidOnly}
+            multiSelectMode={multiSelectMode}
+            selectedContracts={selectedContracts}
+            onToggleSelection={toggleContractSelection}
           />
 
-          {/* IV Smile Chart */}
-          <IVSmileChart
-            calls={chainData.calls}
-            puts={chainData.puts}
-            underlying={chainData.underlying}
-          />
+          {/* Analytics Section with Tabs */}
+          <div className="rounded-lg border border-zinc-200 bg-white">
+            {/* Tab Headers */}
+            <div className="border-b border-zinc-200 bg-zinc-50 p-2">
+              <div className="flex gap-1">
+                <button
+                  onClick={() => setAnalyticsTab("iv-smile")}
+                  className={`rounded-lg px-4 py-2 text-sm font-semibold transition-all ${
+                    analyticsTab === "iv-smile"
+                      ? "bg-white text-zinc-900 shadow-sm"
+                      : "text-zinc-600 hover:bg-white/50 hover:text-zinc-900"
+                  }`}
+                >
+                  📈 IV Smile
+                </button>
+                <button
+                  onClick={() => setAnalyticsTab("oi-heatmap")}
+                  className={`rounded-lg px-4 py-2 text-sm font-semibold transition-all ${
+                    analyticsTab === "oi-heatmap"
+                      ? "bg-white text-zinc-900 shadow-sm"
+                      : "text-zinc-600 hover:bg-white/50 hover:text-zinc-900"
+                  }`}
+                >
+                  🔥 OI Heatmap
+                </button>
+                <button
+                  onClick={() => setAnalyticsTab("vol-term")}
+                  className={`rounded-lg px-4 py-2 text-sm font-semibold transition-all ${
+                    analyticsTab === "vol-term"
+                      ? "bg-white text-zinc-900 shadow-sm"
+                      : "text-zinc-600 hover:bg-white/50 hover:text-zinc-900"
+                  }`}
+                >
+                  📊 Vol Term
+                </button>
+              </div>
+            </div>
 
-          {/* OI Heatmap */}
-          <OIHeatmap
-            calls={chainData.calls}
-            puts={chainData.puts}
-            underlying={chainData.underlying}
-          />
+            {/* Tab Content */}
+            <div className="p-4">
+              {analyticsTab === "iv-smile" && (
+                <IVSmileChart
+                  calls={chainData.calls}
+                  puts={chainData.puts}
+                  underlying={chainData.underlying}
+                />
+              )}
 
-          {/* Volatility Term Structure */}
-          <VolTermStructure symbol={symbol} />
+              {analyticsTab === "oi-heatmap" && (
+                <OIHeatmap
+                  calls={chainData.calls}
+                  puts={chainData.puts}
+                  underlying={chainData.underlying}
+                />
+              )}
+
+              {analyticsTab === "vol-term" && (
+                <VolTermStructure symbol={symbol} />
+              )}
+            </div>
+          </div>
         </>
       )}
 

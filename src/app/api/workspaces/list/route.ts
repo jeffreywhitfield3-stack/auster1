@@ -13,28 +13,26 @@ export async function GET(req: Request) {
   }
 
   const { searchParams } = new URL(req.url);
-  const lab_type = searchParams.get("lab_type");
+  const product = searchParams.get("product");
 
   try {
     let query = supabase
-      .from("workspaces")
+      .from("lab_workspaces")
       .select(`
         id,
-        title,
+        name,
         description,
-        lab_type,
+        product,
         is_public,
-        slug,
-        view_count,
         created_at,
         updated_at,
-        published_at
+        last_accessed_at
       `)
       .eq("user_id", user.id)
-      .order("updated_at", { ascending: false });
+      .order("last_accessed_at", { ascending: false });
 
-    if (lab_type) {
-      query = query.eq("lab_type", lab_type);
+    if (product) {
+      query = query.eq("product", product);
     }
 
     const { data: workspaces, error } = await query;

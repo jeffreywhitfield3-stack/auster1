@@ -6,10 +6,16 @@ import { User, Bell, CreditCard, BarChart3, Shield } from "lucide-react";
 
 const navItems = [
   {
+    name: "Profile",
+    href: "/settings/profile",
+    icon: User,
+    description: "Public profile settings",
+  },
+  {
     name: "Account",
     href: "/settings/account",
     icon: User,
-    description: "Profile and password",
+    description: "Email and password",
   },
   {
     name: "Notifications",

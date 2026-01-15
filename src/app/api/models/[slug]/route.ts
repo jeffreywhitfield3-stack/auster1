@@ -61,6 +61,20 @@ export async function GET(
       new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     );
 
+    // Fetch owner's username from user_profiles if it exists
+    if (model.owner_id) {
+      const { data: ownerProfile } = await supabase
+        .from('user_profiles')
+        .select('username, display_name')
+        .eq('id', model.owner_id)
+        .single();
+
+      if (ownerProfile) {
+        model.owner_username = ownerProfile.username;
+        model.owner_display_name = ownerProfile.display_name;
+      }
+    }
+
     return NextResponse.json({ model });
   } catch (error) {
     console.error('[API] Model fetch error:', error);

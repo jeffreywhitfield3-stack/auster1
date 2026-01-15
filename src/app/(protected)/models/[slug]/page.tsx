@@ -4,13 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import RunPanel from '@/components/models/RunPanel';
-import ResultsPanel from '@/components/models/ResultsPanel';
-import PublishDialog from '@/components/models/PublishDialog';
-import CommentSection from '@/components/social/CommentSection';
-import FollowButton from '@/components/social/FollowButton';
-import type { Model, ModelOutput } from '@/types/models';
-import type { UserProfile } from '@/types/social';
+import type { Model } from '@/types/models';
 
 export default function ModelDetailPage() {
   const params = useParams();
@@ -18,14 +12,8 @@ export default function ModelDetailPage() {
   const slug = params.slug as string;
 
   const [model, setModel] = useState<Model | null>(null);
-  const [author, setAuthor] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [output, setOutput] = useState<ModelOutput | null>(null);
-  const [runId, setRunId] = useState<string | null>(null);
-  const [isPublishDialogOpen, setIsPublishDialogOpen] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchModel();
@@ -36,7 +24,6 @@ export default function ModelDetailPage() {
     setError(null);
 
     try {
-      // Fetch model
       const response = await fetch(`/api/models/${slug}`);
 
       if (!response.ok) {
@@ -48,26 +35,11 @@ export default function ModelDetailPage() {
 
       const data = await response.json();
       setModel(data.model);
-
-      // Check if user is authenticated
-      const meResponse = await fetch('/api/profiles/me');
-      if (meResponse.ok) {
-        setIsAuthenticated(true);
-      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load model');
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleRunComplete = (newOutput: ModelOutput, newRunId: string) => {
-    setOutput(newOutput);
-    setRunId(newRunId);
-  };
-
-  const handlePublishSuccess = (artifactUrl: string) => {
-    router.push(artifactUrl);
   };
 
   if (isLoading) {
@@ -138,8 +110,18 @@ export default function ModelDetailPage() {
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
               {model.name}
             </h1>
+            {/* Author info - link to their profile */}
             <p className="text-gray-600">
-              by {model.owner?.display_name || model.owner?.email || 'Unknown'}
+              by {(model as any).owner_username ? (
+                <Link
+                  href={`/@${(model as any).owner_username}`}
+                  className="text-blue-600 hover:text-blue-700 underline font-medium"
+                >
+                  {(model as any).owner_display_name || (model as any).owner_username}
+                </Link>
+              ) : (
+                <span>Unknown Author</span>
+              )}
             </p>
           </div>
 
@@ -219,70 +201,75 @@ export default function ModelDetailPage() {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left: Run Panel */}
-        <div className="lg:col-span-1">
-          {latestVersion && latestVersion.input_schema && (
-            <RunPanel
-              modelSlug={model.slug}
-              inputSchema={latestVersion.input_schema}
-              onRunComplete={handleRunComplete}
-            />
-          )}
-        </div>
+      {/* Model Details Card */}
+      <div className="bg-white border border-gray-200 rounded-lg p-8">
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">Model Information</h2>
 
-        {/* Right: Results Panel */}
-        <div className="lg:col-span-2">
-          {output ? (
-            <ResultsPanel
-              output={output}
-              runId={runId || undefined}
-              onPublish={() => setIsPublishDialogOpen(true)}
-            />
-          ) : (
-            <div className="bg-white border border-gray-200 rounded-lg p-12 text-center">
-              <svg
-                className="mx-auto h-12 w-12 text-gray-400 mb-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 10V3L4 14h7v7l9-11h-7z"
-                />
-              </svg>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Ready to run
-              </h3>
-              <p className="text-gray-600">
-                Fill in the inputs and click "Run Model" to see results
+        {latestVersion && (
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-sm font-medium text-gray-500 mb-1">Version</h3>
+              <p className="text-gray-900">{latestVersion.version}</p>
+            </div>
+
+            {latestVersion.changelog && (
+              <div>
+                <h3 className="text-sm font-medium text-gray-500 mb-1">Changelog</h3>
+                <p className="text-gray-700">{latestVersion.changelog}</p>
+              </div>
+            )}
+
+            <div>
+              <h3 className="text-sm font-medium text-gray-500 mb-1">Created</h3>
+              <p className="text-gray-700">
+                {new Date(model.created_at).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
               </p>
             </div>
-          )}
+
+            <div>
+              <h3 className="text-sm font-medium text-gray-500 mb-1">Last Updated</h3>
+              <p className="text-gray-700">
+                {new Date(model.updated_at).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
+              </p>
+            </div>
+
+            <div>
+              <h3 className="text-sm font-medium text-gray-500 mb-1">Visibility</h3>
+              <span className={`inline-flex px-3 py-1 text-sm font-medium rounded ${
+                model.visibility === 'public'
+                  ? 'bg-green-100 text-green-700'
+                  : 'bg-gray-100 text-gray-700'
+              }`}>
+                {model.visibility}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Coming Soon Notice */}
+        <div className="mt-8 p-6 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="flex items-start gap-3">
+            <svg className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div>
+              <h4 className="font-semibold text-blue-900 mb-1">Model Execution Coming Soon</h4>
+              <p className="text-sm text-blue-800">
+                The ability to run models directly on the platform is currently in development.
+                For now, you can view model details, specifications, and connect with the author.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
-
-      {/* Comments Section */}
-      <div className="mt-8">
-        <CommentSection
-          modelSlug={slug}
-          isAuthenticated={isAuthenticated}
-        />
-      </div>
-
-      {/* Publish Dialog */}
-      {runId && (
-        <PublishDialog
-          runId={runId}
-          isOpen={isPublishDialogOpen}
-          onClose={() => setIsPublishDialogOpen(false)}
-          onSuccess={handlePublishSuccess}
-        />
-      )}
     </div>
   );
 }

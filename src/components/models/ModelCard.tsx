@@ -65,25 +65,21 @@ export default function ModelCard({ model }: ModelCardProps) {
 
       {/* Stats */}
       <div className="flex items-center gap-4 text-sm text-zinc-500">
-        {/* Runs */}
+        {/* Comments */}
         <div className="flex items-center gap-1">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
           </svg>
-          <span>{model.total_runs.toLocaleString()} runs</span>
+          <span>{((model as any).comment_count || 0).toLocaleString()} comments</span>
         </div>
 
-        {/* Rating */}
-        {model.avg_rating !== null && model.total_ratings > 0 && (
-          <div className="flex items-center gap-1">
-            <svg className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
-              <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-            </svg>
-            <span>
-              {model.avg_rating.toFixed(1)} ({model.total_ratings})
-            </span>
-          </div>
-        )}
+        {/* Likes/Saves */}
+        <div className="flex items-center gap-1">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+          </svg>
+          <span>{((model as any).like_count || 0).toLocaleString()} likes</span>
+        </div>
 
         {/* Difficulty */}
         <div

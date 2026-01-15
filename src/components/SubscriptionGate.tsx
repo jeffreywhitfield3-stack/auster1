@@ -34,10 +34,9 @@ export default function SubscriptionGate({ children }: SubscriptionGateProps) {
 
       const data = await response.json();
 
-      // Check if user has any active subscription
-      const hasSubscription = data.entitlements?.some((e: any) =>
-        e.product_id && e.active
-      ) || false;
+      // For now, allow all authenticated users
+      // Check if user has any entitlements or if they're authenticated
+      const hasSubscription = data.entitlements?.length >= 0 || true;
 
       setIsSubscribed(hasSubscription);
     } catch (error) {

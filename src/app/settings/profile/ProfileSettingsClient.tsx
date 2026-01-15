@@ -17,6 +17,7 @@ export default function ProfileSettingsClient() {
   // Form fields
   const [displayName, setDisplayName] = useState('');
   const [bio, setBio] = useState('');
+  const [affiliation, setAffiliation] = useState('');
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [twitterHandle, setTwitterHandle] = useState('');
   const [linkedinUrl, setLinkedinUrl] = useState('');
@@ -47,6 +48,7 @@ export default function ProfileSettingsClient() {
       setProfile(prof);
       setDisplayName(prof.display_name);
       setBio(prof.bio || '');
+      setAffiliation(prof.affiliation || '');
       setWebsiteUrl(prof.website_url || '');
       setTwitterHandle(prof.twitter_handle || '');
       setLinkedinUrl(prof.linkedin_url || '');
@@ -75,6 +77,7 @@ export default function ProfileSettingsClient() {
         body: JSON.stringify({
           display_name: displayName,
           bio: bio || null,
+          affiliation: affiliation || null,
           website_url: websiteUrl || null,
           twitter_handle: twitterHandle || null,
           linkedin_url: linkedinUrl || null,
@@ -203,6 +206,24 @@ export default function ProfileSettingsClient() {
           />
           <p className="mt-1 text-sm text-gray-500">
             {bio.length}/500 characters
+          </p>
+        </div>
+
+        {/* Affiliation */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Affiliation
+          </label>
+          <input
+            type="text"
+            value={affiliation}
+            onChange={(e) => setAffiliation(e.target.value)}
+            maxLength={200}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="e.g., MIT, Goldman Sachs, Independent Researcher"
+          />
+          <p className="mt-1 text-sm text-gray-500">
+            Your school, company, or organization
           </p>
         </div>
 

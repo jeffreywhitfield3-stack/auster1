@@ -112,6 +112,16 @@ export async function PATCH(request: NextRequest) {
       }
     }
 
+    if (body.affiliation !== undefined) {
+      updates.affiliation = body.affiliation?.trim() || null;
+      if (updates.affiliation && updates.affiliation.length > 200) {
+        return NextResponse.json(
+          { error: 'Affiliation must be 200 characters or less' },
+          { status: 400 }
+        );
+      }
+    }
+
     if (body.avatar_url !== undefined) {
       updates.avatar_url = body.avatar_url || null;
     }

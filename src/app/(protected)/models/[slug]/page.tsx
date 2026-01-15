@@ -201,6 +201,22 @@ export default function ModelDetailPage() {
         </div>
       </div>
 
+      {/* Model Code */}
+      {latestVersion && latestVersion.dsl_json && (
+        <div className="bg-white border border-gray-200 rounded-lg p-8 mb-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Model Code</h2>
+          <div className="bg-gray-900 border border-gray-700 rounded-lg p-6 overflow-x-auto">
+            <pre className="text-sm text-green-400 font-mono leading-relaxed">
+              {JSON.stringify(latestVersion.dsl_json, null, 2)}
+            </pre>
+          </div>
+          <p className="mt-4 text-sm text-gray-600">
+            This is the DSL (Domain Specific Language) code that defines how this model works.
+            You can save this model to use it in your own research or fork it to modify the code.
+          </p>
+        </div>
+      )}
+
       {/* Model Details Card */}
       <div className="bg-white border border-gray-200 rounded-lg p-8">
         <h2 className="text-2xl font-bold text-gray-900 mb-4">Model Information</h2>
@@ -210,6 +226,11 @@ export default function ModelDetailPage() {
             <div>
               <h3 className="text-sm font-medium text-gray-500 mb-1">Version</h3>
               <p className="text-gray-900">{latestVersion.version}</p>
+            </div>
+
+            <div>
+              <h3 className="text-sm font-medium text-gray-500 mb-1">Runtime</h3>
+              <p className="text-gray-900 uppercase">{latestVersion.runtime}</p>
             </div>
 
             {latestVersion.changelog && (

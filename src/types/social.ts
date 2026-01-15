@@ -5,6 +5,7 @@ export interface UserProfile {
   username: string;
   display_name: string;
   bio: string | null;
+  affiliation: string | null;
   avatar_url: string | null;
   website_url: string | null;
   twitter_handle: string | null;
@@ -110,6 +111,7 @@ export interface NotificationsResponse {
 export interface UpdateProfileInput {
   display_name?: string;
   bio?: string | null;
+  affiliation?: string | null;
   avatar_url?: string | null;
   website_url?: string | null;
   twitter_handle?: string | null;

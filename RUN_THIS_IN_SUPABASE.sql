@@ -56,6 +56,7 @@ BEGIN
       username TEXT UNIQUE NOT NULL,
       display_name TEXT NOT NULL,
       bio TEXT,
+      affiliation TEXT,
       avatar_url TEXT,
       website_url TEXT,
       twitter_handle TEXT,
@@ -68,7 +69,8 @@ BEGIN
       updated_at TIMESTAMPTZ DEFAULT NOW(),
       CONSTRAINT username_length CHECK (char_length(username) >= 3 AND char_length(username) <= 30),
       CONSTRAINT username_format CHECK (username ~ '^[a-z0-9_]+$'),
-      CONSTRAINT bio_length CHECK (char_length(bio) <= 500)
+      CONSTRAINT bio_length CHECK (char_length(bio) <= 500),
+      CONSTRAINT affiliation_length CHECK (char_length(affiliation) <= 200)
     );
 
     CREATE INDEX idx_user_profiles_username ON user_profiles(username);
@@ -79,6 +81,21 @@ BEGIN
     RAISE NOTICE 'Created user_profiles table';
   ELSE
     RAISE NOTICE 'user_profiles table already exists';
+  END IF;
+END $$;
+
+-- Add affiliation column if it doesn't exist (for existing tables)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT FROM information_schema.columns
+    WHERE table_name = 'user_profiles' AND column_name = 'affiliation'
+  ) THEN
+    ALTER TABLE user_profiles ADD COLUMN affiliation TEXT;
+    ALTER TABLE user_profiles ADD CONSTRAINT affiliation_length CHECK (char_length(affiliation) <= 200);
+    RAISE NOTICE 'Added affiliation column to user_profiles';
+  ELSE
+    RAISE NOTICE 'affiliation column already exists';
   END IF;
 END $$;
 

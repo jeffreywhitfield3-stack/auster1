@@ -135,18 +135,18 @@ export default function ProfilePageClient({ username }: ProfilePageClientProps) 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       {/* Profile Header */}
-      <div className="bg-white border border-gray-200 rounded-lg p-8 mb-6">
-        <div className="flex items-start gap-6">
+      <div className="bg-white border border-gray-200 rounded-lg p-8 mb-6 shadow-sm">
+        <div className="flex items-start gap-8">
           {/* Avatar */}
           <div className="flex-shrink-0">
             {profile.avatar_url ? (
               <img
                 src={profile.avatar_url}
                 alt={profile.display_name}
-                className="w-32 h-32 rounded-full object-cover border-4 border-gray-100"
+                className="w-32 h-32 rounded-full object-cover border-4 border-blue-50"
               />
             ) : (
-              <div className="w-32 h-32 rounded-full bg-blue-100 flex items-center justify-center border-4 border-gray-100">
+              <div className="w-32 h-32 rounded-full bg-blue-100 flex items-center justify-center border-4 border-blue-50">
                 <span className="text-4xl font-bold text-blue-600">
                   {profile.display_name.charAt(0).toUpperCase()}
                 </span>
@@ -156,12 +156,17 @@ export default function ProfilePageClient({ username }: ProfilePageClientProps) 
 
           {/* Profile Info */}
           <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between gap-4 mb-3">
+            <div className="flex items-start justify-between gap-4 mb-4">
               <div>
                 <h1 className="text-3xl font-bold text-gray-900 mb-1">
                   {profile.display_name}
                 </h1>
-                <p className="text-gray-600">@{profile.username}</p>
+                <p className="text-lg text-gray-600 mb-2">@{profile.username}</p>
+                {profile.affiliation && (
+                  <p className="text-base text-gray-700 font-medium bg-gray-50 px-3 py-1 rounded-md inline-block">
+                    {profile.affiliation}
+                  </p>
+                )}
               </div>
 
               {/* Actions */}
@@ -185,13 +190,13 @@ export default function ProfilePageClient({ username }: ProfilePageClientProps) 
 
             {/* Bio */}
             {profile.bio && (
-              <p className="text-gray-700 mb-4 whitespace-pre-wrap">
+              <p className="text-base text-gray-800 mb-4 whitespace-pre-wrap leading-relaxed">
                 {profile.bio}
               </p>
             )}
 
             {/* Meta Info */}
-            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
+            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-700">
               {profile.location && (
                 <div className="flex items-center gap-1.5">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -247,21 +252,21 @@ export default function ProfilePageClient({ username }: ProfilePageClientProps) 
 
             {/* Stats */}
             <div className="flex items-center gap-6 mt-4 pt-4 border-t border-gray-200">
-              <div>
-                <span className="font-semibold text-gray-900">{profile.follower_count || 0}</span>
-                <span className="text-gray-600 ml-1">followers</span>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-gray-900">{profile.follower_count || 0}</div>
+                <div className="text-sm text-gray-600">Followers</div>
               </div>
-              <div>
-                <span className="font-semibold text-gray-900">{profile.following_count || 0}</span>
-                <span className="text-gray-600 ml-1">following</span>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-gray-900">{profile.following_count || 0}</div>
+                <div className="text-sm text-gray-600">Following</div>
               </div>
-              <div>
-                <span className="font-semibold text-gray-900">{profile.model_count || 0}</span>
-                <span className="text-gray-600 ml-1">models</span>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-gray-900">{profile.model_count || 0}</div>
+                <div className="text-sm text-gray-600">Models</div>
               </div>
-              <div>
-                <span className="font-semibold text-gray-900">{profile.research_count || 0}</span>
-                <span className="text-gray-600 ml-1">research posts</span>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-gray-900">{profile.research_count || 0}</div>
+                <div className="text-sm text-gray-600">Research</div>
               </div>
             </div>
           </div>

@@ -5,6 +5,8 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import type { Model } from '@/types/models';
+import SubscriptionGate from '@/components/SubscriptionGate';
+import CommentSection from '@/components/models/CommentSection';
 
 export default function ModelDetailPage() {
   const params = useParams();
@@ -86,6 +88,7 @@ export default function ModelDetailPage() {
   const latestVersion = model.versions?.[0];
 
   return (
+    <SubscriptionGate>
     <div className="max-w-7xl mx-auto px-4 py-8">
       {/* Breadcrumb */}
       <nav className="mb-6 text-sm">
@@ -172,13 +175,6 @@ export default function ModelDetailPage() {
 
         {/* Stats */}
         <div className="flex items-center gap-6 text-sm text-gray-600">
-          <div className="flex items-center gap-2">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-            <span>{(model.total_runs || 0).toLocaleString()} runs</span>
-          </div>
-
           {model.avg_rating !== null && model.avg_rating !== undefined && (model.total_ratings || 0) > 0 && (
             <div className="flex items-center gap-2">
               <svg className="w-5 h-5 text-yellow-400 fill-current" viewBox="0 0 20 20">
@@ -190,14 +186,12 @@ export default function ModelDetailPage() {
             </div>
           )}
 
-          {model.unique_users !== null && model.unique_users !== undefined && (
-            <div className="flex items-center gap-2">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-              </svg>
-              <span>{model.unique_users.toLocaleString()} unique users</span>
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+            <span>{(model.total_ratings || 0).toLocaleString()} views</span>
+          </div>
         </div>
       </div>
 
@@ -275,22 +269,11 @@ export default function ModelDetailPage() {
           </div>
         )}
 
-        {/* Coming Soon Notice */}
-        <div className="mt-8 p-6 bg-blue-50 border border-blue-200 rounded-lg">
-          <div className="flex items-start gap-3">
-            <svg className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <div>
-              <h4 className="font-semibold text-blue-900 mb-1">Model Execution Coming Soon</h4>
-              <p className="text-sm text-blue-800">
-                The ability to run models directly on the platform is currently in development.
-                For now, you can view model details, specifications, and connect with the author.
-              </p>
-            </div>
-          </div>
-        </div>
       </div>
+
+      {/* Comments Section */}
+      <CommentSection modelId={model.id} />
     </div>
+    </SubscriptionGate>
   );
 }

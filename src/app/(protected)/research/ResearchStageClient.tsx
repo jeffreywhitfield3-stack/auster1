@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import SubscriptionGate from "@/components/SubscriptionGate";
 
 // Research Stage: Auster's public research institution
 // Where economic and financial analyses become permanent public artifacts
@@ -10,6 +11,7 @@ export default function ResearchStageClient() {
   const [activeView, setActiveView] = useState<"recent" | "topics" | "researchers">("recent");
 
   return (
+    <SubscriptionGate>
     <main className="min-h-screen bg-gradient-to-b from-zinc-50 to-white">
       {/* Hero Section */}
       <div className="border-b border-zinc-200 bg-white">
@@ -103,7 +105,14 @@ export default function ResearchStageClient() {
           </p>
         </div>
       </div>
+
+      {/* View Content */}
+      {activeView === "recent" && <RecentResearchView />}
+      {activeView === "topics" && <TopicsView />}
+      {activeView === "researchers" && <ResearchersView />}
+
     </main>
+    </SubscriptionGate>
   );
 }
 
